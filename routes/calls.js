@@ -1,0 +1,9 @@
+const express = require('express');
+const router = express.Router();
+const analyticsController = require('../controllers/analyticsController');
+const { authenticateApiKey } = require('../middleware/auth');
+const callsController = require('../controllers/callsController');
+
+router.get('/:client_id', authenticateApiKey, analyticsController.getCalls);
+
+module.exports = router;
