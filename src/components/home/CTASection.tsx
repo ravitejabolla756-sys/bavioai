@@ -23,7 +23,7 @@ export function CTASection() {
               <span className="text-gradient">your calls?</span>
             </h2>
             <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
-              Join the next generation of innovative businesses using Bavio to scale operations and deliver flawless voice experiences.
+              Join the next generation of innovative businesses using Bavio AI to scale operations and deliver flawless voice experiences.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <SlidingTextButton

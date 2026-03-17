@@ -128,3 +128,26 @@ body {
     @apply mt-2.5 w-1.5 h-1.5 rounded-full bg-indigo-500/50 shrink-0;
   }
 }
+
+@keyframes glitch-line {
+  0% { transform: translateY(-100%) scaleY(1); opacity: 0; }
+  10% { opacity: 1; }
+  50% { transform: translateY(100vh) scaleY(2); opacity: 0.5; }
+  100% { transform: translateY(100vh) scaleY(1); opacity: 0; }
+}
+
+@keyframes glitch-line-delay {
+  0% { transform: translateY(-100%) scaleY(1); opacity: 0; }
+  20% { opacity: 0; }
+  30% { opacity: 1; }
+  70% { transform: translateY(100vh) scaleY(3); opacity: 0.5; }
+  100% { transform: translateY(100vh) scaleY(1); opacity: 0; }
+}
+
+.animate-glitch-line {
+  animation: glitch-line 1.5s infinite linear;
+}
+
+.animate-glitch-line-delay {
+  animation: glitch-line-delay 2s infinite linear;
+}

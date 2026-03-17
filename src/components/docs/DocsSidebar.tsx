@@ -22,7 +22,7 @@ const navigation = [
   {
     title: "Introduction",
     items: [
-      { id: "intro", label: "Welcome to Bavio", icon: Book, href: "/docs#intro" },
+      { id: "intro", label: "Welcome to Bavio AI", icon: Book, href: "/docs#intro" },
       { id: "getting-started", label: "Getting Started", icon: Terminal, href: "/docs#getting-started" },
     ],
   },

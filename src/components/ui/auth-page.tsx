@@ -35,7 +35,7 @@ export function AuthPage({ isLoginDefault = false }: { isLoginDefault?: boolean 
 					<div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center overflow-hidden">
 						<span className="text-white text-sm font-black relative z-10">B</span>
 					</div>
-					<p className="text-2xl font-bold tracking-tight">Bavio</p>
+					<p className="text-2xl font-bold tracking-tight">Bavio AI</p>
 				</div>
 				
 				<div className="z-20 mt-auto">
@@ -71,7 +71,7 @@ export function AuthPage({ isLoginDefault = false }: { isLoginDefault?: boolean 
 						<div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center overflow-hidden">
 							<span className="text-white text-sm font-black tracking-tight">B</span>
 						</div>
-						<p className="text-2xl font-bold">Bavio</p>
+						<p className="text-2xl font-bold">Bavio AI</p>
 					</div>
 
 					<div className="flex flex-col space-y-2 text-center lg:text-left">

@@ -54,7 +54,7 @@ export function Footer() {
                 <div className="absolute inset-0 bg-white/20 group-hover:translate-y-full transition-transform duration-500 ease-in-out" />
                 <span className="text-white text-sm font-black relative z-10">B</span>
               </div>
-              Bavio
+              Bavio AI
             </Link>
             <p className="text-zinc-400 text-sm max-w-xs font-light leading-relaxed mb-6">
               Enterprise-grade AI voice agents. Answer calls, extract intent, and automate workflows in real-time.
@@ -84,7 +84,7 @@ export function Footer() {
         
         <div className="pt-8 border-t border-white/[0.05] flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-zinc-600 text-sm font-light">
-            © {new Date().getFullYear()} Bavio Inc. All rights reserved.
+            © {new Date().getFullYear()} Bavio AI Inc. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center gap-6 md:gap-8 text-sm font-light">
             <Link href="#" className="text-zinc-500 hover:text-white transition-colors">

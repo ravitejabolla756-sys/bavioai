@@ -21,9 +21,9 @@ export default function DocsPage() {
         <div className="inline-flex items-center px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-md text-[10px] font-bold uppercase tracking-widest mb-6">
           Version 2.0 Platform API
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight">Introduction to Bavio</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight">Introduction to Bavio AI</h1>
         <p className="text-lg text-zinc-400 leading-relaxed font-light max-w-2xl">
-          Learn how to build, deploy, and manage production-grade AI voice agents with the Bavio platform. Our API provides hyper-realistic low-latency voice interaction for any business workflow.
+          Learn how to build, deploy, and manage production-grade AI voice agents with the Bavio AI platform. Our API provides hyper-realistic low-latency voice interaction for any business workflow.
         </p>
       </section>
 
@@ -69,7 +69,7 @@ export default function DocsPage() {
       <section id="getting-started" className="mb-20 scroll-mt-32 border-t border-white/5 pt-12">
         <h2 className="text-2xl font-bold mb-6 text-white tracking-tight">Getting Started</h2>
         <p className="text-zinc-400 font-light mb-8">
-          To start using Bavio, generate an API key from the developer dashboard. This key securely authenticates your requests to our REST and WebSocket APIs.
+          To start using Bavio AI, generate an API key from the developer dashboard. This key securely authenticates your requests to our REST and WebSocket APIs.
         </p>
         <DocsCodeBlock 
           label="SDK Initialization"
@@ -132,7 +132,7 @@ const client = new Bavio({
            Security & Compliance
          </h2>
          <p className="text-zinc-400 font-light mb-8">
-           Bavio is built with security at its core. We maintain SOC2 Type II compliance and provide end-to-end encryption for all conversation data and API keys.
+           Bavio AI is built with security at its core. We maintain SOC2 Type II compliance and provide end-to-end encryption for all conversation data and API keys.
          </p>
       </section>
     </DocsLayout>

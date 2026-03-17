@@ -26,7 +26,7 @@ export function DocsLayout({ children, tocItems }: DocsLayoutProps) {
                 <div className="absolute inset-0 bg-white/20 group-hover:translate-y-full transition-transform duration-500 ease-in-out" />
                 <span className="text-white text-sm font-black relative z-10">B</span>
               </div>
-            <span className="text-xl font-bold text-white tracking-tight hidden sm:block">Bavio Docs</span>
+            <span className="text-xl font-bold text-white tracking-tight hidden sm:block">Bavio AI Docs</span>
           </Link>
 
           <DocsSearch />

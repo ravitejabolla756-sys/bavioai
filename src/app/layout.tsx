@@ -13,9 +13,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Bavio | AI Voice Automation for Business",
+  title: "Bavio AI | AI Voice Automation for Business",
   description: "Deploy AI voice agents that answer business calls, understand requests, and complete tasks.",
 };
+
+import { LandingIntro } from "@/components/ui/LandingIntro";
 
 export default function RootLayout({
   children,
@@ -27,6 +29,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans antialiased text-white selection:bg-[#7B61FF]/30 min-h-screen flex flex-col overflow-x-hidden relative`}
       >
+        <LandingIntro />
         {/* ── Global background system ── */}
         {/* 0. Opaque dark base — the true page background */}
         <div className="fixed inset-0 pointer-events-none -z-[60]" style={{ backgroundColor: "#050507" }} />

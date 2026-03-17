@@ -58,12 +58,12 @@ export function Navigation() {
         <Link href="/" className="text-3xl font-bold tracking-tight text-white flex items-center gap-3 group">
           <Image 
             src="/logo.png" 
-            alt="Bavio Logo" 
+            alt="Bavio AI Logo" 
             width={64} 
             height={64} 
             className="w-12 h-12 object-contain dark:invert" 
           />
-          Bavio
+          Bavio AI
         </Link>
         
         {/* Desktop Navigation */}
@@ -82,7 +82,7 @@ export function Navigation() {
           <SlidingTextButton
             onClick={() => openAuthModal(true)}
             variant="primary"
-            hoverText="Join Bavio"
+            hoverText="Join Bavio AI"
             className="px-6 py-2.5 rounded-full text-sm font-bold shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.2)]"
           >
             Sign Up

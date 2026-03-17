@@ -24,7 +24,7 @@ import {
 import Link from "next/link";
 
 export const metadata = {
-  title: "Company | Bavio",
+  title: "Company | Bavio AI",
   description: "Pioneering the future of voice communication with intelligent AI voice agents.",
 };
 
@@ -51,7 +51,7 @@ export default function CompanyPage() {
               Pioneering the future of <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient-x">voice communication.</span>
             </h1>
             <p className="text-xl text-zinc-400 mb-12 font-light leading-relaxed max-w-[600px] mx-auto">
-              Bavio builds AI voice agents that handle real business calls in real time. From answering customers to booking appointments, every call becomes automated, intelligent, and instant.
+              Bavio AI builds AI voice agents that handle real business calls in real time. From answering customers to booking appointments, every call becomes automated, intelligent, and instant.
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
               <Link
@@ -135,7 +135,7 @@ export default function CompanyPage() {
         <div className="container mx-auto px-6 max-w-7xl">
           <div className="text-center mb-20">
             <h2 className="text-sm font-bold text-indigo-500 tracking-[0.3em] uppercase mb-6">Execution</h2>
-            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">How Bavio Works</h3>
+            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">How Bavio AI Works</h3>
           </div>
 
           <div className="relative">
@@ -146,7 +146,7 @@ export default function CompanyPage() {
               {[
                 { title: "Select a Plan", desc: "A business signs up and selects a volume-based plan.", icon: <Layout /> },
                 { title: "Share Data", desc: "Provide services, timings, and business knowledge.", icon: <CheckCircle2 /> },
-                { title: "AI Creation", desc: "Bavio creates a dedicated voice agent for your brand.", icon: <Cpu /> },
+                { title: "AI Creation", desc: "Bavio AI creates a dedicated voice agent for your brand.", icon: <Cpu /> },
                 { title: "Go Live", desc: "A number is assigned and the AI starts handling calls.", icon: <Rocket /> }
               ].map((step, i) => (
                 <div key={i} className="glass-card p-8 rounded-[2rem] hover:scale-[1.05] hover:shadow-[0_20px_40px_rgba(99,102,241,0.1)] transition-all duration-300 group">
@@ -230,12 +230,12 @@ export default function CompanyPage() {
                 Built by 2 founders • Early stage
               </span>
             </div>
-            <h2 className="text-sm font-bold text-purple-500 tracking-[0.3em] uppercase mb-10">How Bavio Started</h2>
+            <h2 className="text-sm font-bold text-purple-500 tracking-[0.3em] uppercase mb-10">How Bavio AI Started</h2>
             <div className="prose prose-invert prose-lg max-w-none text-zinc-400 font-light leading-relaxed">
               <p className="text-2xl text-white font-medium mb-8 leading-snug">
                 &ldquo;We decided to build a system where every call is answered, understood, and acted upon.&rdquo;
               </p>
-              <p className="mb-6">Bavio started from a simple observation: businesses are losing customers because they cannot handle calls efficiently. We saw hospitals missing calls, restaurants losing bookings, and service businesses unable to respond in time.</p>
+              <p className="mb-6">Bavio AI started from a simple observation: businesses are losing customers because they cannot handle calls efficiently. We saw hospitals missing calls, restaurants losing bookings, and service businesses unable to respond in time.</p>
               <p>Built by two Computer Science students from SRM Institute of Science and Technology, Trichy, focused on solving real-world problems through practical systems.</p>
             </div>
           </div>
@@ -297,7 +297,7 @@ export default function CompanyPage() {
         <div className="container mx-auto px-6 max-w-7xl">
           <div className="text-center mb-20">
             <h2 className="text-sm font-bold text-indigo-500 tracking-[0.3em] uppercase mb-6">Benefits</h2>
-            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">Why Bavio</h3>
+            <h3 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">Why Bavio AI</h3>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
             {[
@@ -404,7 +404,7 @@ export default function CompanyPage() {
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-indigo-600/10 rounded-full blur-[150px] -z-10" />
         
         <div className="container mx-auto px-6 max-w-4xl text-center relative z-10">
-          <h2 className="text-4xl md:text-7xl font-bold text-white mb-8 tracking-tight">Build with Bavio</h2>
+          <h2 className="text-4xl md:text-7xl font-bold text-white mb-8 tracking-tight">Build with Bavio AI</h2>
           <p className="text-xl text-zinc-400 mb-12 font-light max-w-2xl mx-auto">Be part of the future of voice automation. Start your journey with us today.</p>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-6">

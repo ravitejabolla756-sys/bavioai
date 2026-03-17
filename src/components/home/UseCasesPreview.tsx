@@ -67,7 +67,7 @@ export function UseCasesPreview() {
               Built for <span className="text-gradient">every industry.</span>
             </h2>
             <p className="text-zinc-400 text-lg font-light leading-relaxed">
-              Bavio adapts instantly to your business logic, handling deep industry-specific knowledge and complex operational workflows with ease.
+              Bavio AI adapts instantly to your business logic, handling deep industry-specific knowledge and complex operational workflows with ease.
             </p>
           </motion.div>
           
@@ -130,7 +130,7 @@ export function UseCasesPreview() {
                 <MessageSquare size={16} />
               </div>
               <h3 className="text-sm font-medium text-zinc-300 group-hover:text-white">Don't see your industry?</h3>
-              <p className="text-xs text-zinc-500 mt-2 font-light">Bavio can be trained on any data.</p>
+              <p className="text-xs text-zinc-500 mt-2 font-light">Bavio AI can be trained on any data.</p>
             </motion.div>
         </div>
       </div>

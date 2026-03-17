@@ -1,7 +1,7 @@
 import { Stethoscope, Utensils, Building2, Wrench, Headphones } from "lucide-react";
 
 export const metadata = {
-  title: "Use Cases | Bavio",
+  title: "Use Cases | Bavio AI",
   description: "Discover how AI voice agents can be utilized across different industries.",
 };
 
@@ -20,7 +20,7 @@ const industries = [
     id: "restaurants",
     title: "Restaurant Operations",
     icon: <Utensils size={28} className="text-orange-400" />,
-    desc: "Never miss a reservation call during the dinner rush. Bavio answers questions about the menu, hours, dietary restrictions, and books tables directly into your reservation system.",
+    desc: "Never miss a reservation call during the dinner rush. Bavio AI answers questions about the menu, hours, dietary restrictions, and books tables directly into your reservation system.",
     scenario: {
       customer: "Do you guys have any vegan options on the current seasonal menu?",
       ai: "Yes, our seasonal menu features three dedicated plant-based dishes, including a roasted butternut squash risotto. Would you like me to make a reservation for you to try it?"
@@ -40,7 +40,7 @@ const industries = [
     id: "service",
     title: "Field Service & Trades",
     icon: <Wrench size={28} className="text-yellow-400" />,
-    desc: "Automate emergency intake for plumbers, electricians, and HVAC technicians. Bavio triages the issue severity and dispatches the right technician.",
+    desc: "Automate emergency intake for plumbers, electricians, and HVAC technicians. Bavio AI triages the issue severity and dispatches the right technician.",
     scenario: {
       customer: "My AC stopped working, it's making a loud grinding noise and leaking water.",
       ai: "I'm sorry to hear that. Since it's leaking and making a grinding noise, we should dispatch an emergency technician to prevent water damage. I can have someone at your home by 2 PM today."
@@ -71,7 +71,7 @@ export default function UseCasesPage() {
             Built for <span className="text-gradient">every industry.</span>
           </h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto font-light leading-relaxed">
-            See how Bavio is transforming customer communication across different sectors with context-aware, deeply integrated agents.
+            See how Bavio AI is transforming customer communication across different sectors with context-aware, deeply integrated agents.
           </p>
         </div>
 
