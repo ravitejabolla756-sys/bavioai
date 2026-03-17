@@ -74,9 +74,9 @@ export default function DocsPage() {
         <DocsCodeBlock 
           label="SDK Initialization"
           language="typescript"
-          code={`import { Bavio } from '@bavio/sdk';
+          code={`import { BavioAI } from '@bavio/sdk';
 
-const client = new Bavio({
+const client = new BavioAI({
   apiKey: process.env.BAVIO_API_KEY,
   environment: 'production'
 });`}
