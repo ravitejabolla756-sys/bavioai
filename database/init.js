@@ -3,53 +3,35 @@
  * Bavio.ai — Database initializer
  *
  * Reads schema.sql and executes it against Supabase using the service role.
- * Log output shows success / failure for each logical section.
+ * Imports the shared Supabase client from db.js — does NOT create its own.
  *
  * Usage:
  *   node database/init.js
  *
- * Required env vars:
+ * Required env vars (set in .env at project root):
  *   SUPABASE_URL
  *   SUPABASE_SERVICE_KEY
  */
 
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import { createClient } from '@supabase/supabase-js';
-import 'dotenv/config';
+// Load env vars FIRST before anything else
+require('dotenv').config();
+
+const { readFileSync } = require('fs');
+const { join } = require('path');
+
+// Reuse the single shared Supabase client — no duplicate createClient calls
+const supabase = require('./db');
 
 // ---------------------------------------------------------------------------
-// Environment validation
+// Fetch env vars (already validated and loaded by db.js)
 // ---------------------------------------------------------------------------
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.error('❌  Missing required environment variables: SUPABASE_URL, SUPABASE_SERVICE_KEY');
-    process.exit(1);
-}
-
 // ---------------------------------------------------------------------------
-// Supabase client — service role (bypasses RLS)
+// Execute raw SQL via the exec_sql RPC function
 // ---------------------------------------------------------------------------
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
-});
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-const __filename = fileURLToPath(import.meta.url);
-const __dir = dirname(__filename);
-
-/**
- * Execute raw SQL via Supabase's rpc helper.
- * Supabase does not expose a direct SQL endpoint in the JS client,
- * so we call the `exec_sql` Postgres function (created below if missing).
- */
 async function runSQL(sql) {
-    // Call the built-in Supabase SQL execution via REST (service role required)
     const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/exec_sql`, {
         method: 'POST',
         headers: {
@@ -67,11 +49,9 @@ async function runSQL(sql) {
     return response.json();
 }
 
-/**
- * Bootstrap a helper function inside Postgres that allows us to
- * execute arbitrary SQL via an RPC call.
- * Uses Supabase's Management API (requires service_role token).
- */
+// ---------------------------------------------------------------------------
+// Bootstrap the exec_sql helper function in Postgres (if not already present)
+// ---------------------------------------------------------------------------
 async function bootstrapExecSQL() {
     const bootstrapSQL = `
     CREATE OR REPLACE FUNCTION exec_sql(sql text)
@@ -95,26 +75,26 @@ async function bootstrapExecSQL() {
         body: JSON.stringify({ query: bootstrapSQL }),
     });
 
-    // If /pg/query isn't available (self-hosted vs managed differs),
-    // fall back silently — exec_sql may already exist.
+    // /pg/query may not be available on all Supabase tiers — fail silently
     if (!response.ok) {
         console.warn('  ⚠  Could not bootstrap exec_sql function (may already exist). Continuing…');
     }
 }
 
 // ---------------------------------------------------------------------------
-// Parse schema.sql into named sections for granular logging
+// Parse schema.sql into named sections for granular per-section logging
 // ---------------------------------------------------------------------------
 function parseSections(sql) {
-    // Split on our section-comment markers: -- ===…=== followed by -- N. title
     const sectionPattern = /(?=-- ={10,}\n-- \d+\.)/g;
     const rawSections = sql.split(sectionPattern);
 
-    return rawSections.map((block) => {
-        const titleMatch = block.match(/^-- ={10,}\n-- (.+?)\n/m);
-        const title = titleMatch ? titleMatch[1].trim() : 'Preamble / Extensions';
-        return { title, sql: block.trim() };
-    }).filter((s) => s.sql.length > 0);
+    return rawSections
+        .map((block) => {
+            const titleMatch = block.match(/^-- ={10,}\n-- (.+?)\n/m);
+            const title = titleMatch ? titleMatch[1].trim() : 'Preamble / Extensions';
+            return { title, sql: block.trim() };
+        })
+        .filter((s) => s.sql.length > 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -127,7 +107,7 @@ async function main() {
     console.log('='.repeat(50));
 
     // Read schema file
-    const schemaPath = join(__dir, 'schema.sql');
+    const schemaPath = join(__dirname, 'schema.sql');
     let schemaSQL;
     try {
         schemaSQL = readFileSync(schemaPath, 'utf-8');
@@ -176,9 +156,9 @@ async function main() {
             console.log(`     ${e.error.slice(0, 300)}\n`);
         }
 
-        // Check if failures are just "already exists" errors (idempotent re-runs)
-        const allIdempotent = errors.every(
-            (e) => e.error.toLowerCase().includes('already exists'),
+        // Idempotent re-run check
+        const allIdempotent = errors.every((e) =>
+            e.error.toLowerCase().includes('already exists')
         );
         if (allIdempotent) {
             console.log('ℹ️   All failures are "already exists" — schema is up to date.\n');
