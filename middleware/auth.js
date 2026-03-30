@@ -1,27 +1,45 @@
-const db = require('../database/db');
+/**
+ * middleware/auth.js
+ * Bavio.ai — JWT Authentication Middleware
+ *
+ * Reads:  Authorization: Bearer <token>
+ * Writes: req.user = { business_id, email }
+ *
+ * Rejects:
+ *  - Missing token         → 401
+ *  - Expired / invalid JWT → 401
+ */
 
-const authenticateApiKey = async (req, res, next) => {
-    try {
-        const apiKey = req.headers['x-api-key'];
+const jwt = require('jsonwebtoken');
 
-        if (!apiKey) {
-            return res.status(401).json({ error: 'Authentication failed: Missing x-api-key header' });
-        }
+function authenticateJWT(req, res, next) {
+    const authHeader = req.headers['authorization'];
 
-        const result = await db.query('SELECT * FROM clients WHERE api_key = $1 AND status = $2', [apiKey, 'active']);
-
-        if (result.rows.length === 0) {
-            return res.status(403).json({ error: 'Authentication failed: Invalid or inactive API key' });
-        }
-
-        req.client = result.rows[0];
-        next();
-    } catch (error) {
-        console.error('Authentication Error:', error);
-        res.status(500).json({ error: 'Internal Server Error during authentication' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+            success: false,
+            error: 'Authentication required. Provide a valid Bearer token.',
+        });
     }
-};
 
-module.exports = {
-    authenticateApiKey
-};
+    const token = authHeader.split(' ')[1];
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Attach the business identity to the request — available in all route handlers
+        req.user = {
+            business_id: decoded.business_id,
+            email: decoded.email,
+        };
+
+        next();
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ success: false, error: 'Token expired. Please log in again.' });
+        }
+        return res.status(401).json({ success: false, error: 'Invalid token.' });
+    }
+}
+
+module.exports = { authenticateJWT };
