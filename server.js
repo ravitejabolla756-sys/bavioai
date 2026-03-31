@@ -1,20 +1,38 @@
-// Load env vars first — must be before any other imports
 require('dotenv').config();
 
+const http = require('http');
 const express = require('express');
+
 const authRoutes = require('./routes/auth');
+const realtimeRoutes = require('./routes/realtime');
+const webhookRoutes = require('./routes/webhooks');
+const { createRealtimeGateway } = require('./services/realtime/realtimeGateway');
 
 const app = express();
-app.use(express.json());
 
-// Health check
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false }));
+
 app.get('/', (req, res) => {
-    res.json({ status: 'ok', service: 'Bavio.ai API' });
+    res.json({
+        status: 'ok',
+        service: 'Bavio.ai API',
+        capabilities: ['auth', 'realtime-voice'],
+    });
 });
 
-// Routes
 app.use('/auth', authRoutes);
+app.use('/realtime', realtimeRoutes);
+app.use('/webhooks', webhookRoutes);
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log(`🚀 Bavio.ai server listening on port ${process.env.PORT || 3000}`);
+const server = http.createServer(app);
+const realtimeGateway = createRealtimeGateway({ server });
+
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
+    console.log(`Bavio.ai server listening on port ${PORT}`);
+    console.log('Realtime WebSocket endpoint ready at /realtime/ws');
 });
+
+module.exports = { app, server, realtimeGateway };
