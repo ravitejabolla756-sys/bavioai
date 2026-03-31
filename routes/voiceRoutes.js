@@ -1,37 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const voiceOrchestrator = require('../services/orchestrator/voiceOrchestrator');
+const callService = require('../services/callService');
 
 /**
  * POST /voice/respond
  * Accept transcribed speech and return AI-generated text + audio response.
  *
- * Body: { session_id, transcript, system_prompt?, target_language_code?, speaker? }
+ * Body: { sessionId?, transcript, callSid? }
  */
 router.post('/respond', async (req, res) => {
-    try {
-        const { session_id, transcript, system_prompt, target_language_code, speaker } = req.body;
+    let { sessionId, transcript, callSid } = req.body;
 
-        if (!session_id || !transcript) {
+    try {
+        if (!transcript) {
             return res.status(400).json({
                 success: false,
-                message: 'session_id and transcript are required'
+                message: 'transcript is required'
             });
         }
 
-        const result = await voiceOrchestrator.handleVoiceInput(session_id, transcript, {
-            systemPrompt: system_prompt,
-            target_language_code,
-            speaker
-        });
+        // 1. If sessionId is missing, start a new call session
+        if (!sessionId) {
+            sessionId = callService.startCall(callSid || `manual_${Date.now()}`);
+        }
 
+        // 2. Handle the user speech turn
+        const result = await callService.handleUserSpeech(sessionId, transcript);
+
+        // 3. Return JSON as requested
         res.status(200).json({
-            success: true,
-            data: {
-                session_id,
-                textResponse: result.textResponse,
-                audioBase64: result.audioBase64
-            }
+            sessionId,
+            text: result.text,
+            audio: result.audio
         });
     } catch (err) {
         console.error('[VoiceRoute] /respond error:', err.message);
@@ -47,25 +47,24 @@ router.post('/respond', async (req, res) => {
  * POST /voice/end
  * End a voice session and clear its conversation history.
  *
- * Body: { session_id }
+ * Body: { sessionId }
  */
 router.post('/end', async (req, res) => {
-    try {
-        const { session_id } = req.body;
+    const { sessionId } = req.body;
+    console.log("Voice end request received:", sessionId);
 
-        if (!session_id) {
+    try {
+        if (!sessionId) {
             return res.status(400).json({
                 success: false,
-                message: 'session_id is required'
+                message: 'sessionId is required'
             });
         }
 
-        const result = voiceOrchestrator.endSession(session_id);
+        const cleared = callService.endCall(sessionId);
 
         res.status(200).json({
-            success: true,
-            message: result.cleared ? 'Session ended' : 'Session not found',
-            data: { session_id, cleared: result.cleared }
+            status: cleared ? 'session ended' : 'session not found'
         });
     } catch (err) {
         console.error('[VoiceRoute] /end error:', err.message);

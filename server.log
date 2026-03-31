@@ -1,0 +1,4 @@
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+⚠️  Supabase not configured — running in local mode
+Bavio AI Backend running on port 3000
+Supabase JS Client connection failed: Supabase not configured

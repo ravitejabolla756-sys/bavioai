@@ -21,9 +21,9 @@ class VoiceOrchestrator {
      * @param {string}  [options.systemPrompt]          — custom system prompt for the session
      * @param {string}  [options.target_language_code]   — TTS language (default: en-IN)
      * @param {string}  [options.speaker]                — TTS voice
-     * @returns {Promise<{textResponse: string, audioBase64: string}>}
+     * @returns {Promise<{text: string, audio: string}>}
      */
-    async handleVoiceInput(sessionId, transcript, options = {}) {
+    async handleVoiceTurn(sessionId, transcript, options = {}) {
         const startTime = Date.now();
         console.log(`[VoiceOrchestrator] Processing input for session: ${sessionId}`);
 
@@ -51,8 +51,8 @@ class VoiceOrchestrator {
             console.log(`[VoiceOrchestrator] Turn completed in ${elapsed}ms`);
 
             return {
-                textResponse,
-                audioBase64
+                text: textResponse,
+                audio: audioBase64
             };
         } catch (error) {
             console.error(`[VoiceOrchestrator] Error: ${error.message}`);

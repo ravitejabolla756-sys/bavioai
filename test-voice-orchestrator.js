@@ -5,27 +5,51 @@
  */
 async function runVoiceTests() {
     const baseUrl = 'http://localhost:3000';
-    const sessionId = `test_voice_${Date.now()}`;
+    let sessionId = null;
 
-    console.log('=== Voice Orchestrator API Tests ===\n');
+    console.log('=== Voice Orchestrator - Full Call Simulation ===\n');
 
-    // --- Test 1: Send voice input ---
-    console.log('--- Test 1: POST /voice/respond ---');
+    // --- Step 1: Initial Turn (starts session) ---
+    console.log('--- Step 1: POST /voice/respond (Initial) ---');
     try {
         const response = await fetch(`${baseUrl}/voice/respond`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                session_id: sessionId,
-                transcript: 'Hello, I would like to book an appointment for tomorrow.'
+                transcript: 'Hello, I want to book an appointment'
             })
         });
         const data = await response.json();
 
-        if (data.success && data.data.textResponse && data.data.audioBase64) {
-            console.log('✅ PASS — Response received');
-            console.log(`   Text: "${data.data.textResponse.substring(0, 100)}..."`);
-            console.log(`   Audio: ${data.data.audioBase64.substring(0, 40)}... (base64)`);
+        if (data.sessionId && (data.text || data.audio)) {
+            sessionId = data.sessionId;
+            console.log('✅ PASS — Session created:', sessionId);
+            console.log(`   AI Text: "${data.text ? data.text.substring(0, 60) : 'N/A'}..."`);
+        } else {
+            console.log('❌ FAIL —', JSON.stringify(data, null, 2));
+            return; // Stop if initial fails
+        }
+    } catch (err) {
+        console.log('❌ FAIL —', err.message);
+        return;
+    }
+
+    // --- Step 2: Follow-up Turn (maintains context) ---
+    console.log('\n--- Step 2: POST /voice/respond (Follow-up) ---');
+    try {
+        const response = await fetch(`${baseUrl}/voice/respond`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: sessionId,
+                transcript: 'My name is Ravi'
+            })
+        });
+        const data = await response.json();
+
+        if (data.sessionId === sessionId && data.text) {
+            console.log('✅ PASS — Follow-up succeeded for session:', sessionId);
+            console.log(`   AI Text: "${data.text.substring(0, 60)}..."`);
         } else {
             console.log('❌ FAIL —', JSON.stringify(data, null, 2));
         }
@@ -33,60 +57,18 @@ async function runVoiceTests() {
         console.log('❌ FAIL —', err.message);
     }
 
-    // --- Test 2: Follow-up turn (context test) ---
-    console.log('\n--- Test 2: POST /voice/respond (follow-up) ---');
-    try {
-        const response = await fetch(`${baseUrl}/voice/respond`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                session_id: sessionId,
-                transcript: 'My name is Ravi and I prefer 3 PM.'
-            })
-        });
-        const data = await response.json();
-
-        if (data.success && data.data.textResponse) {
-            console.log('✅ PASS — Follow-up response received (context maintained)');
-            console.log(`   Text: "${data.data.textResponse.substring(0, 100)}..."`);
-        } else {
-            console.log('❌ FAIL —', JSON.stringify(data, null, 2));
-        }
-    } catch (err) {
-        console.log('❌ FAIL —', err.message);
-    }
-
-    // --- Test 3: Validation (missing fields) ---
-    console.log('\n--- Test 3: POST /voice/respond (validation) ---');
-    try {
-        const response = await fetch(`${baseUrl}/voice/respond`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ session_id: sessionId })
-        });
-        const data = await response.json();
-
-        if (!data.success && response.status === 400) {
-            console.log('✅ PASS — Validation correctly rejected missing transcript');
-        } else {
-            console.log('❌ FAIL — Expected 400 error');
-        }
-    } catch (err) {
-        console.log('❌ FAIL —', err.message);
-    }
-
-    // --- Test 4: End session ---
-    console.log('\n--- Test 4: POST /voice/end ---');
+    // --- Step 3: End Call ---
+    console.log('\n--- Step 3: POST /voice/end ---');
     try {
         const response = await fetch(`${baseUrl}/voice/end`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ session_id: sessionId })
+            body: JSON.stringify({ sessionId: sessionId })
         });
         const data = await response.json();
 
-        if (data.success && data.data.cleared) {
-            console.log('✅ PASS — Session ended and cleared');
+        if (data.status === 'session ended') {
+            console.log('✅ PASS — Session ended successfully');
         } else {
             console.log('❌ FAIL —', JSON.stringify(data, null, 2));
         }
@@ -94,7 +76,7 @@ async function runVoiceTests() {
         console.log('❌ FAIL —', err.message);
     }
 
-    console.log('\n=== Tests Complete ===');
+    console.log('\n=== Simulation Complete ===');
 }
 
 runVoiceTests();

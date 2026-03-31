@@ -212,7 +212,8 @@ const callsRoutes = require('./routes/calls');
 const usageRoutes = require('./routes/usage');
 const telephonyRoutes = require('./routes/telephony');
 const aiCallsRoutes = require('./routes/aiCalls');
-const voiceOrchestratorRoutes = require('./routes/voiceOrchestrator');
+const voiceRoutes = require('./routes/voiceRoutes');
+const twilioRoutes = require('./routes/twilioRoutes');
 
 app.use('/clients', clientsRoutes);
 app.use('/assistants', apiLimiter, assistantsRoutes);
@@ -221,7 +222,8 @@ app.use('/calls', apiLimiter, callsRoutes);
 app.use('/usage', apiLimiter, usageRoutes);
 app.use('/telephony', telephonyRoutes);
 app.use('/', aiCallsRoutes);
-app.use('/voice', voiceOrchestratorRoutes);
+app.use('/voice', voiceRoutes);
+app.use('/twilio', twilioRoutes);
 
 // ------- Health Check -------
 app.get('/health', (req, res) => {
