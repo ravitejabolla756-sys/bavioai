@@ -6,6 +6,7 @@ const express = require('express');
 const authRoutes = require('./routes/auth');
 const realtimeRoutes = require('./routes/realtime');
 const webhookRoutes = require('./routes/webhooks');
+const { requireAuth } = require('./middleware/authMiddleware');
 const { createRealtimeGateway } = require('./services/realtime/realtimeGateway');
 
 const app = express();
@@ -24,6 +25,13 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/realtime', realtimeRoutes);
 app.use('/webhooks', webhookRoutes);
+
+app.get('/protected', requireAuth, (req, res) => {
+    res.status(200).json({
+        success: true,
+        user: req.user,
+    });
+});
 
 const server = http.createServer(app);
 const realtimeGateway = createRealtimeGateway({ server });

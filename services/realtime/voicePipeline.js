@@ -15,6 +15,7 @@ class VoicePipeline {
         this.ttsTokenBuffer = '';
         this.assistantStreaming = false;
         this.inputSpeechActive = false;
+        this.awaitingFinalTranscript = false;
         this.stopped = false;
         this.ready = this.initialize();
     }
@@ -72,7 +73,12 @@ class VoicePipeline {
             this.emitEvent('vad.local.end', { session_id: this.sessionId });
         }
 
-        this.sttStream.sendAudio(normalized.audioBase64);
+        const audioBuffer = Buffer.from(normalized.audioBase64, 'base64');
+        const chunkSize = 3200;
+        for (let offset = 0; offset < audioBuffer.length; offset += chunkSize) {
+            const chunk = audioBuffer.subarray(offset, Math.min(offset + chunkSize, audioBuffer.length));
+            this.sttStream.sendAudio(chunk.toString('base64'));
+        }
         await sessionStore.update(this.sessionId, {
             last_input_at: new Date().toISOString(),
         });
@@ -80,6 +86,12 @@ class VoicePipeline {
 
     async flushInput(reason = 'final') {
         await this.ready;
+        if (reason === 'final' && this.awaitingFinalTranscript) {
+            return;
+        }
+        if (reason === 'final') {
+            this.awaitingFinalTranscript = true;
+        }
         this.pendingTranscriptKinds.push(reason);
         this.sttStream.flush();
     }
@@ -119,6 +131,7 @@ class VoicePipeline {
             return;
         }
 
+        this.awaitingFinalTranscript = false;
         this.stopPartialFlushLoop();
         const finalText = utteranceSoFar;
         this.partialSegments = [];
@@ -152,6 +165,7 @@ class VoicePipeline {
         this.assistantStreaming = true;
         this.ttsTokenBuffer = '';
         this.llmAbortController = new AbortController();
+        const llmMessages = this.buildLlmMessages(session);
 
         this.ttsStream = await this.providers.tts.createStream({
             languageCode: session.metadata.language_code || 'en-IN',
@@ -173,13 +187,7 @@ class VoicePipeline {
 
         try {
             const llmResult = await this.providers.llm.streamResponse({
-                messages: [
-                    { role: 'system', content: session.assistant.system_prompt },
-                    ...session.transcript.map((entry) => ({
-                        role: entry.role,
-                        content: entry.content,
-                    })),
-                ],
+                messages: llmMessages,
                 abortSignal: this.llmAbortController.signal,
                 onToken: async (token) => {
                     this.emitEvent('assistant.partial', {
@@ -223,6 +231,97 @@ class VoicePipeline {
                 return;
             }
             throw error;
+        } finally {
+            this.assistantStreaming = false;
+        }
+    }
+
+    buildLlmMessages(session) {
+        const conversation = [];
+
+        for (const entry of session.transcript) {
+            if (entry.role !== 'user' && entry.role !== 'assistant') {
+                continue;
+            }
+
+            if (conversation.length === 0 && entry.role !== 'user') {
+                continue;
+            }
+
+            const previous = conversation[conversation.length - 1];
+            if (previous?.role === entry.role) {
+                previous.content = `${previous.content}\n${entry.content}`;
+                continue;
+            }
+
+            conversation.push({
+                role: entry.role,
+                content: entry.content,
+            });
+        }
+
+        if (conversation.length === 0) {
+            return [{
+                role: 'user',
+                content: `${session.assistant.system_prompt}\n\nRespond briefly and helpfully.`,
+            }];
+        }
+
+        conversation[0] = {
+            role: 'user',
+            content: `${session.assistant.system_prompt}\n\nConversation start:\n${conversation[0].content}`,
+        };
+
+        return conversation;
+    }
+
+    async speakAssistantText(text, metadata = {}) {
+        await this.ready;
+
+        const session = await sessionStore.get(this.sessionId);
+        if (!session || !text || !text.trim()) {
+            return;
+        }
+
+        await this.interruptAssistant('speak-text');
+
+        this.assistantStreaming = true;
+        this.ttsStream = await this.providers.tts.createStream({
+            languageCode: session.metadata.language_code || 'en-IN',
+            speaker: session.assistant.voice || 'aditya',
+            onAudio: (audioChunk) => {
+                this.emitEvent('audio.output', {
+                    session_id: this.sessionId,
+                    audio: audioChunk,
+                });
+            },
+            onComplete: () => {
+                this.emitEvent('audio.output.complete', { session_id: this.sessionId });
+            },
+            onError: (error) => {
+                console.error('[voicePipeline.tts.speak]', error);
+                this.emitEvent('error', { session_id: this.sessionId, error: error.message });
+            },
+        });
+
+        try {
+            this.ttsStream.pushText(text.trim());
+            this.ttsStream.flush();
+
+            const assistantMessage = await sessionStore.appendTranscript(this.sessionId, {
+                role: 'assistant',
+                content: text.trim(),
+                metadata: {
+                    provider: 'sarvam-tts',
+                    kind: 'greeting',
+                    ...metadata,
+                },
+            });
+
+            this.emitEvent('assistant.final', {
+                session_id: this.sessionId,
+                message: assistantMessage,
+            });
         } finally {
             this.assistantStreaming = false;
         }

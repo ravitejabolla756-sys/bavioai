@@ -1,131 +1,188 @@
-/**
- * controllers/authController.js
- * Bavio.ai — Auth controller
- *
- * Responsibilities:
- *  - Validate inputs
- *  - Call authService
- *  - Sign JWTs
- *  - Return structured JSON responses
- *  - Handle errors with correct HTTP status codes
- */
-
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const authService = require('../services/authService');
 
-// ---------------------------------------------------------------------------
-// JWT helper
-// ---------------------------------------------------------------------------
+const supabase = require('../database/db');
+
+const SALT_ROUNDS = 12;
+
 function signToken(business) {
     return jwt.sign(
-        { business_id: business.id, email: business.email },
+        { id: business.id, email: business.email },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
     );
 }
 
-// ---------------------------------------------------------------------------
-// POST /auth/signup
-// ---------------------------------------------------------------------------
 async function signup(req, res) {
     try {
-        const { name, email, phone, password } = req.body;
+        const { name, email, phone, password } = req.body || {};
 
-        // --- Input validation ---
-        if (!name || !email || !phone || !password) {
-            return res.status(400).json({
-                success: false,
-                error: 'name, email, phone, and password are all required.',
-            });
+        const normalizedName = typeof name === 'string' ? name.trim() : '';
+        const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+        const normalizedPhone = typeof phone === 'string' ? phone.trim() : '';
+        const normalizedPassword = typeof password === 'string' ? password : '';
+
+        if (!normalizedName || !normalizedEmail || !normalizedPhone || !normalizedPassword) {
+            return res.status(400).json({ success: false, error: 'Missing fields' });
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        if (!emailRegex.test(normalizedEmail)) {
             return res.status(400).json({ success: false, error: 'Invalid email format.' });
         }
 
-        if (password.length < 8) {
+        if (normalizedPassword.length < 6) {
             return res.status(400).json({
                 success: false,
-                error: 'Password must be at least 8 characters long.',
+                error: 'Password must be at least 6 characters long.',
             });
         }
 
-        // --- Create business ---
-        const business = await authService.signupBusiness({ name, email, phone, password });
-        const token = signToken(business);
+        const { data: existingEmail, error: emailLookupError } = await supabase
+            .from('businesses')
+            .select('id')
+            .eq('email', normalizedEmail)
+            .maybeSingle();
+
+        if (emailLookupError) {
+            console.error('SIGNUP ERROR:', emailLookupError);
+            return res.status(500).json({ success: false, error: emailLookupError.message });
+        }
+
+        if (existingEmail) {
+            return res.status(409).json({ success: false, error: 'Email already exists' });
+        }
+
+        const { data: existingPhone, error: phoneLookupError } = await supabase
+            .from('businesses')
+            .select('id')
+            .eq('phone', normalizedPhone)
+            .maybeSingle();
+
+        if (phoneLookupError) {
+            console.error('SIGNUP ERROR:', phoneLookupError);
+            return res.status(500).json({ success: false, error: phoneLookupError.message });
+        }
+
+        if (existingPhone) {
+            return res.status(409).json({ success: false, error: 'Phone already exists' });
+        }
+
+        const password_hash = await bcrypt.hash(normalizedPassword, SALT_ROUNDS);
+
+        const { data, error } = await supabase
+            .from('businesses')
+            .insert([{
+                name: normalizedName,
+                email: normalizedEmail,
+                phone: normalizedPhone,
+                password_hash,
+                plan: 'free',
+                status: 'active',
+            }])
+            .select('id, name, email, phone, plan, status, created_at, updated_at')
+            .single();
+
+        if (error) {
+            console.error('SIGNUP ERROR:', error);
+            if (error.code === '23505' || error.status === 409) {
+                if ((error.message || '').toLowerCase().includes('email')) {
+                    return res.status(409).json({ success: false, error: 'Email already exists' });
+                }
+
+                if ((error.message || '').toLowerCase().includes('phone')) {
+                    return res.status(409).json({ success: false, error: 'Phone already exists' });
+                }
+            }
+
+            return res.status(500).json({ success: false, error: error.message });
+        }
 
         return res.status(201).json({
             success: true,
-            message: 'Account created successfully.',
-            token,
-            business,
+            message: 'Signup successful',
+            user: data,
         });
-
     } catch (err) {
-        if (err.code === 'DUPLICATE_EMAIL') {
-            return res.status(409).json({ success: false, error: err.message });
-        }
-        if (err.code === 'DUPLICATE_PHONE') {
-            return res.status(409).json({ success: false, error: err.message });
-        }
-        console.error('[authController.signup]', err.message, err.details || '');
-        return res.status(500).json({ success: false, error: 'Internal server error during signup.', detail: err.message });
+        console.error('SIGNUP ERROR:', err);
+        return res.status(500).json({ success: false, error: err.message });
     }
 }
 
-// ---------------------------------------------------------------------------
-// POST /auth/login
-// ---------------------------------------------------------------------------
 async function login(req, res) {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body || {};
+        const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+        const normalizedPassword = typeof password === 'string' ? password : '';
 
-        if (!email || !password) {
-            return res.status(400).json({ success: false, error: 'email and password are required.' });
+        if (!normalizedEmail || !normalizedPassword) {
+            return res.status(400).json({ success: false, error: 'Missing fields' });
         }
 
-        const business = await authService.loginBusiness(email, password);
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(normalizedEmail)) {
+            return res.status(400).json({ success: false, error: 'Invalid email format.' });
+        }
+
+        const { data: business, error } = await supabase
+            .from('businesses')
+            .select('id, name, email, phone, plan, status, password_hash')
+            .eq('email', normalizedEmail)
+            .maybeSingle();
+
+        if (error) {
+            console.error('LOGIN ERROR:', error);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+
+        if (!business) {
+            return res.status(401).json({ success: false, error: 'Invalid email or password' });
+        }
+
+        const passwordMatches = await bcrypt.compare(normalizedPassword, business.password_hash);
+
+        if (!passwordMatches) {
+            return res.status(401).json({ success: false, error: 'Invalid email or password' });
+        }
+
         const token = signToken(business);
+        const { password_hash, ...safeUser } = business;
 
         return res.status(200).json({
             success: true,
-            message: 'Login successful.',
             token,
-            business,
+            user: safeUser,
         });
-
     } catch (err) {
-        if (err.code === 'INVALID_CREDENTIALS') {
-            return res.status(401).json({ success: false, error: err.message });
-        }
-        if (err.code === 'ACCOUNT_SUSPENDED') {
-            return res.status(403).json({ success: false, error: err.message });
-        }
-        console.error('[authController.login]', err);
-        return res.status(500).json({ success: false, error: 'Internal server error during login.' });
+        console.error('LOGIN ERROR:', err);
+        return res.status(500).json({ success: false, error: err.message });
     }
 }
 
-// ---------------------------------------------------------------------------
-// GET /auth/me  (protected)
-// ---------------------------------------------------------------------------
 async function me(req, res) {
     try {
-        // req.user is attached by the JWT middleware
-        const business = await authService.getBusinessById(req.user.business_id);
+        const { data: business, error } = await supabase
+            .from('businesses')
+            .select('id, name, email, phone, plan, status, created_at, updated_at')
+            .eq('id', req.user.id)
+            .maybeSingle();
+
+        if (error) {
+            console.error('ME ERROR:', error);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+
+        if (!business) {
+            return res.status(404).json({ success: false, error: 'Business not found' });
+        }
 
         return res.status(200).json({
             success: true,
-            business,
+            user: business,
         });
-
     } catch (err) {
-        if (err.code === 'NOT_FOUND') {
-            return res.status(404).json({ success: false, error: err.message });
-        }
-        console.error('[authController.me]', err);
-        return res.status(500).json({ success: false, error: 'Internal server error.' });
+        console.error('ME ERROR:', err);
+        return res.status(500).json({ success: false, error: err.message });
     }
 }
 

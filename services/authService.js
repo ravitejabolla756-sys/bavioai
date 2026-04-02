@@ -20,11 +20,28 @@ function sanitizeBusiness(business) {
     return safe;
 }
 
+function buildInvalidCredentialsError() {
+    const err = new Error('Invalid email or password.');
+    err.code = 'INVALID_CREDENTIALS';
+    return err;
+}
+
+function buildSuspendedError() {
+    const err = new Error('This account has been suspended. Please contact support.');
+    err.code = 'ACCOUNT_SUSPENDED';
+    return err;
+}
+
 // ---------------------------------------------------------------------------
 // signupBusiness
 // ---------------------------------------------------------------------------
 async function signupBusiness({ name, email, phone, password }) {
-    // 1. Check for existing email
+    if (!name || !email || !phone || !password) {
+        const err = new Error('Missing fields');
+        err.code = 'MISSING_FIELDS';
+        throw err;
+    }
+
     const { data: existing, error: lookupErr } = await supabase
         .from('businesses')
         .select('id')
@@ -38,7 +55,6 @@ async function signupBusiness({ name, email, phone, password }) {
         throw err;
     }
 
-    // 2. Check for existing phone
     const { data: existingPhone, error: phoneLookupErr } = await supabase
         .from('businesses')
         .select('id')
@@ -52,21 +68,20 @@ async function signupBusiness({ name, email, phone, password }) {
         throw err;
     }
 
-    // 3. Hash the password
     const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
+    const payload = {
+        name,
+        email,
+        phone,
+        password_hash,
+        plan: 'free',
+        status: 'active',
+    };
 
-    // 4. Insert into businesses table
     const { data: business, error: insertErr } = await supabase
         .from('businesses')
-        .insert([{
-            name,
-            email,
-            phone,
-            password_hash,
-            plan: 'free',
-            status: 'active',
-        }])
-        .select()
+        .insert([payload])
+        .select('id, name, email, phone, plan, status, created_at, updated_at')
         .single();
 
     if (insertErr) throw insertErr;
@@ -78,7 +93,6 @@ async function signupBusiness({ name, email, phone, password }) {
 // loginBusiness
 // ---------------------------------------------------------------------------
 async function loginBusiness(email, password) {
-    // 1. Fetch business by email (include password_hash for comparison)
     const { data: business, error } = await supabase
         .from('businesses')
         .select('*')
@@ -87,20 +101,13 @@ async function loginBusiness(email, password) {
 
     if (error) throw error;
 
-    // Use a generic message to avoid user enumeration attacks
-    const invalidErr = new Error('Invalid email or password.');
-    invalidErr.code = 'INVALID_CREDENTIALS';
-
+    const invalidErr = buildInvalidCredentialsError();
     if (!business) throw invalidErr;
 
-    // 2. Check account status
     if (business.status !== 'active') {
-        const suspendedErr = new Error('This account has been suspended. Please contact support.');
-        suspendedErr.code = 'ACCOUNT_SUSPENDED';
-        throw suspendedErr;
+        throw buildSuspendedError();
     }
 
-    // 3. Compare password
     const passwordMatches = await bcrypt.compare(password, business.password_hash);
     if (!passwordMatches) throw invalidErr;
 
@@ -125,7 +132,7 @@ async function getBusinessById(id) {
         throw err;
     }
 
-    return business; // password_hash already excluded via select
+    return business;
 }
 
 module.exports = { signupBusiness, loginBusiness, getBusinessById };

@@ -11,11 +11,30 @@ function createRealtimeGateway({ server }) {
     const providers = createVoiceProviders();
     const pipelines = new Map();
     const connections = new Map();
+    const DEBUG = process.env.REALTIME_DEBUG === 'true';
+
+    function debugLog(message, details) {
+        if (DEBUG) {
+            console.log(`[realtimeGateway:${message}]`, JSON.stringify(details || {}));
+        }
+    }
 
     function sendJson(socket, payload) {
         if (socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify(payload));
         }
+    }
+
+    function sendProviderMessages(socket, messages, frameDelayMs = 20) {
+        if (!messages || messages.length === 0) {
+            return;
+        }
+
+        messages.forEach((message, index) => {
+            setTimeout(() => {
+                sendJson(socket, message);
+            }, index * frameDelayMs);
+        });
     }
 
     function getConnectionsForSession(sessionId) {
@@ -41,9 +60,9 @@ function createRealtimeGateway({ server }) {
                         }
 
                         if (type === 'audio.output') {
-                            const providerMessage = telephonyService.buildProviderAudioMessage(connection, payload.audio);
-                            if (providerMessage) {
-                                sendJson(connection.socket, providerMessage);
+                            const providerMessages = telephonyService.buildProviderAudioMessage(connection, payload.audio);
+                            if (providerMessages?.length) {
+                                sendProviderMessages(connection.socket, providerMessages);
                             }
                             continue;
                         }
@@ -78,6 +97,20 @@ function createRealtimeGateway({ server }) {
         const callSid = requestUrl.searchParams.get('call_sid');
         const connectionId = randomUUID();
         const kind = provider ? 'telephony' : 'client';
+        const pendingMessages = [];
+        let processMessage = null;
+
+        socket.on('message', (rawMessage) => {
+            if (processMessage) {
+                processMessage(rawMessage).catch((error) => {
+                    console.error('[realtimeGateway]', error);
+                    sendJson(socket, { type: 'error', error: error.message || 'Realtime pipeline failure.' });
+                });
+                return;
+            }
+
+            pendingMessages.push(rawMessage);
+        });
 
         const session = await sessionStore.get(sessionId);
         if (!session) {
@@ -101,28 +134,33 @@ function createRealtimeGateway({ server }) {
             streamSid: null,
         });
 
-        await sessionStore.addConnectionMetadata(sessionId, connectionId, metadata);
-        await sessionStore.markSocketConnected(sessionId, true);
-        await getPipeline(sessionId);
+        const connectionReady = (async () => {
+            await sessionStore.addConnectionMetadata(sessionId, connectionId, metadata);
+            await sessionStore.markSocketConnected(sessionId, true);
+            await getPipeline(sessionId);
+            debugLog('connection', { sessionId, connectionId, kind, provider });
 
-        if (kind === 'client') {
-            sendJson(socket, {
-                type: 'session.ready',
-                session_id: session.id,
-                status: session.status,
-                welcome_message: session.assistant.welcome_message,
-            });
-        }
+            if (kind === 'client') {
+                sendJson(socket, {
+                    type: 'session.ready',
+                    session_id: session.id,
+                    status: session.status,
+                    welcome_message: session.assistant.welcome_message,
+                });
+            }
+        })();
 
-        socket.on('message', async (rawMessage) => {
+        processMessage = async (rawMessage) => {
             let message;
             try {
                 message = JSON.parse(rawMessage.toString());
+                debugLog('message', { sessionId, kind, type: message.type || message.event });
             } catch (error) {
                 sendJson(socket, { type: 'error', error: 'Invalid JSON payload.' });
                 return;
             }
 
+            await connectionReady;
             const currentConnection = sessionConnections.get(connectionId);
             const pipeline = await getPipeline(sessionId);
 
@@ -163,12 +201,20 @@ function createRealtimeGateway({ server }) {
                 const normalizedMessage = telephonyService.normalizeWsMessage(provider, message);
 
                 switch (normalizedMessage.type) {
+                    case 'call.connected':
+                        break;
                     case 'call.started':
                         currentConnection.streamSid = normalizedMessage.streamSid;
                         await sessionStore.addConnectionMetadata(sessionId, connectionId, {
                             ...metadata,
                             stream_sid: normalizedMessage.streamSid,
                         });
+                        if (!currentConnection.greetingSent && session?.assistant?.welcome_message) {
+                            currentConnection.greetingSent = true;
+                            await pipeline.speakAssistantText(session.assistant.welcome_message, {
+                                source: 'telephony-welcome',
+                            });
+                        }
                         break;
                     case 'audio.input':
                         await pipeline.ingestAudioFrame(normalizedMessage);
@@ -190,9 +236,14 @@ function createRealtimeGateway({ server }) {
                 console.error('[realtimeGateway]', error);
                 sendJson(socket, { type: 'error', error: error.message || 'Realtime pipeline failure.' });
             }
-        });
+        };
+
+        for (const rawMessage of pendingMessages.splice(0, pendingMessages.length)) {
+            await processMessage(rawMessage);
+        }
 
         socket.on('close', async () => {
+            await connectionReady.catch(() => null);
             sessionConnections.delete(connectionId);
             await sessionStore.removeConnectionMetadata(sessionId, connectionId);
 
@@ -210,6 +261,8 @@ function createRealtimeGateway({ server }) {
                 await closePipeline(sessionId, 'socket-closed');
             }
         });
+
+        await connectionReady;
     });
 
     server.on('upgrade', async (req, socket, head) => {
