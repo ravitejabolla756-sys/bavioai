@@ -4,14 +4,8 @@ const http = require('http');
 const express = require('express');
 
 const authRoutes = require('./routes/auth');
-const callsRoutes = require('./routes/calls');
-const assistantsRoutes = require('./routes/assistants');
-const analyticsRoutes = require('./routes/analytics');
-const leadsRoutes = require('./routes/leads');
 const realtimeRoutes = require('./routes/realtime');
 const webhookRoutes = require('./routes/webhooks');
-const voiceRoutes = require('./routes/voiceRoutes');
-const twilioRoutes = require('./routes/twilioRoutes');
 const { requireAuth } = require('./middleware/authMiddleware');
 const { createRealtimeGateway } = require('./services/realtime/realtimeGateway');
 const { testConnection } = require('./database/db');
@@ -39,14 +33,30 @@ app.get('/health', async (req, res) => {
 });
 
 app.use('/auth', authRoutes);
-app.use('/calls', callsRoutes);
-app.use('/assistants', assistantsRoutes);
-app.use('/analytics', analyticsRoutes);
-app.use('/leads', leadsRoutes);
 app.use('/realtime', realtimeRoutes);
 app.use('/webhooks', webhookRoutes);
-app.use('/voice', voiceRoutes);
-app.use('/twilio', twilioRoutes);
+
+function mountOptionalRoute(basePath, modulePath) {
+    try {
+        const router = require(modulePath);
+        app.use(basePath, router);
+        console.log(`[SERVER] route mounted: ${basePath}`);
+    } catch (error) {
+        if (error.code === 'MODULE_NOT_FOUND') {
+            console.warn(`[SERVER] route skipped: ${basePath} (${error.message})`);
+            return;
+        }
+
+        throw error;
+    }
+}
+
+mountOptionalRoute('/calls', './routes/calls');
+mountOptionalRoute('/assistants', './routes/assistants');
+mountOptionalRoute('/analytics', './routes/analytics');
+mountOptionalRoute('/leads', './routes/leads');
+mountOptionalRoute('/voice', './routes/voiceRoutes');
+mountOptionalRoute('/twilio', './routes/twilioRoutes');
 
 app.get('/protected', requireAuth, (req, res) => {
     res.status(200).json({
