@@ -1,66 +1,87 @@
-const supabase = require('../database/db');
-const providerFactory = require('../providers/index');
+const crypto = require('crypto');
+const axios = require('axios');
 
-const COST_PER_MINUTE = 0.05; // $0.05 per minute
+const DODO_BASE_URL = 'https://api.dodopayments.com/v1';
 
-async function processCallEnd({ providerCallId, phoneNumberId, callerNumber, durationSeconds, provider }) {
-    const durationMinutes = Math.ceil(durationSeconds / 60);
-    const cost = parseFloat((durationMinutes * COST_PER_MINUTE).toFixed(4));
+async function createSubscription(businessId, plan, email) {
+    try {
+        const customerResponse = await axios.post(
+            `${DODO_BASE_URL}/customers`,
+            {
+                external_id: businessId,
+                email,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.DODO_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                timeout: 30000,
+            }
+        );
 
-    // Insert call record
-    const { data: call, error: callErr } = await supabase
-        .from('calls')
-        .insert([{
-            phone_number_id: phoneNumberId,
-            provider_call_id: providerCallId,
-            caller_number: callerNumber,
-            call_status: 'completed',
-            duration: durationSeconds,
-            cost: cost
-        }])
-        .select()
-        .single();
-    if (callErr) throw callErr;
+        const customerId = customerResponse.data?.id;
 
-    // Get client_id from phone_numbers
-    const { data: numData, error: numErr } = await supabase
-        .from('phone_numbers')
-        .select('client_id')
-        .eq('id', phoneNumberId)
-        .single();
+        const subscriptionResponse = await axios.post(
+            `${DODO_BASE_URL}/subscriptions`,
+            {
+                customer_id: customerId,
+                plan,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.DODO_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                timeout: 30000,
+            }
+        );
 
-    if (numErr && numErr.code !== 'PGRST116') throw numErr;
-    const clientId = numData ? numData.client_id : null;
-
-    if (clientId) {
-        // Insert usage log
-        const { error: logErr } = await supabase
-            .from('usage_logs')
-            .insert([{
-                client_id: clientId,
-                call_id: call.id,
-                minutes_used: durationMinutes,
-                cost: cost
-            }]);
-        if (logErr) throw logErr;
-
-        // Update client usage_minutes using an RPC or getting current then updating.
-        // We will fetch and update since Supabase vanilla client doesn't support increment directly w/o RPC
-        const { data: clientData, error: clientErr } = await supabase
-            .from('clients')
-            .select('usage_minutes')
-            .eq('id', clientId)
-            .single();
-
-        if (!clientErr && clientData) {
-            await supabase
-                .from('clients')
-                .update({ usage_minutes: (clientData.usage_minutes || 0) + durationMinutes })
-                .eq('id', clientId);
-        }
+        return {
+            customer_id: customerId,
+            subscription_id: subscriptionResponse.data?.id,
+            checkout_url: subscriptionResponse.data?.checkout_url,
+        };
+    } catch (error) {
+        console.error('[BILLING] createSubscription:', error.message);
+        throw error;
     }
-
-    return call;
 }
 
-module.exports = { processCallEnd, COST_PER_MINUTE };
+function verifyWebhookSignature(payload, signature) {
+    try {
+        const expected = crypto
+            .createHmac('sha256', process.env.DODO_WEBHOOK_SECRET)
+            .update(payload)
+            .digest('hex');
+
+        const expectedBuffer = Buffer.from(expected);
+        const providedBuffer = Buffer.from(signature || '');
+
+        return expectedBuffer.length === providedBuffer.length
+            && crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+    } catch (error) {
+        console.error('[BILLING] verifyWebhookSignature:', error.message);
+        return false;
+    }
+}
+
+function calculateCallCost(durationSeconds, ttsChars) {
+    const cost_stt = (durationSeconds / 3600) * 30;
+    const cost_tts = (ttsChars / 10000) * 15;
+    const cost_telephony = (durationSeconds / 60) * 0.60;
+    const cost_total = cost_stt + cost_tts + cost_telephony;
+
+    return {
+        cost_stt: Number(cost_stt.toFixed(4)),
+        cost_tts: Number(cost_tts.toFixed(4)),
+        cost_telephony: Number(cost_telephony.toFixed(4)),
+        cost_total: Number(cost_total.toFixed(4)),
+    };
+}
+
+module.exports = {
+    createSubscription,
+    verifyWebhookSignature,
+    calculateCallCost,
+};
