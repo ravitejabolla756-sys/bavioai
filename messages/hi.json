@@ -1,0 +1,36 @@
+{
+  "nav": {
+    "useCases": "उपयोग क्षेत्र",
+    "pricing": "प्राइसिंग",
+    "docs": "डॉक्स",
+    "company": "कंपनी",
+    "blog": "ब्लॉग",
+    "login": "लॉग इन",
+    "startFree": "फ्री शुरू करें"
+  },
+  "common": {
+    "indiaBadge": "भारत का #1 AI Voice Platform",
+    "noCard": "क्रेडिट कार्ड की ज़रूरत नहीं",
+    "trai": "TRAI अनुरूप",
+    "soc": "SOC 2 Ready",
+    "data": "भारतीय डेटा रेजिडेंसी",
+    "exotel": "Exotel Certified Partner",
+    "monthly": "मासिक",
+    "yearly": "वार्षिक",
+    "saveTwenty": "20% बचाएं",
+    "connected": "Connected",
+    "bookDemo": "फ्री डेमो बुक करें",
+    "responsePromise": "2 कार्य घंटों में जवाब"
+  },
+  "footer": {
+    "tagline": "बिज़नेस कॉल्स के लिए Autonomous Voice Agents",
+    "location": "बेंगलुरु, भारत",
+    "rights": "© 2026 Bavio AI Inc. सर्वाधिकार सुरक्षित।"
+  },
+  "auth": {
+    "signupTitle": "अपना Bavio AI workspace बनाएं",
+    "loginTitle": "वापसी पर स्वागत है",
+    "google": "Google से जारी रखें",
+    "forgotPassword": "पासवर्ड भूल गए?"
+  }
+}
