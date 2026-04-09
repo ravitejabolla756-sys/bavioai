@@ -18,10 +18,15 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
 
 async function testConnection() {
     try {
-        const { error } = await supabase.from('businesses').select('id', { head: true, count: 'exact' }).limit(1);
+        const { error } = await supabase
+            .from('businesses')
+            .select('id', { head: true, count: 'exact' })
+            .limit(1);
+
         if (error) {
             throw error;
         }
+
         console.log('[DB] connection: ok');
     } catch (error) {
         console.error('[DB] connection: failed', error.message);
@@ -29,7 +34,6 @@ async function testConnection() {
     }
 }
 
-module.exports = {
-    supabase,
-    testConnection,
-};
+module.exports = supabase;
+module.exports.supabase = supabase;
+module.exports.testConnection = testConnection;
