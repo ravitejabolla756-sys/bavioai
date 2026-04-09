@@ -1,58 +1,95 @@
-const assistantService = require('../services/assistantService');
+const { supabase } = require('../database/db');
 
 async function createAssistant(req, res) {
     try {
-        const { client_id, name, system_prompt } = req.body;
-        if (!client_id || !name) return res.status(400).json({ error: 'client_id and name are required' });
-        const assistant = await assistantService.createAssistant({ client_id, name, system_prompt });
-        res.status(201).json(assistant);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-}
+        const {
+            name = 'Bavio Assistant',
+            language = 'hi-IN',
+            system_prompt = '',
+            first_message = 'Namaste! Main aapki kaise madad kar sakta hoon?',
+            industry = 'general',
+        } = req.body || {};
 
-async function getAssistants(req, res) {
-    try {
-        const assistants = await assistantService.getAssistantsForClient(req.params.client_id);
-        res.status(200).json(assistants);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        const { data, error } = await supabase
+            .from('assistants')
+            .insert([{
+                business_id: req.user.id,
+                name,
+                language,
+                system_prompt,
+                first_message,
+                industry,
+                status: 'active',
+            }])
+            .select('*')
+            .single();
+
+        if (error) {
+            console.error('[ASSISTANT] create:', error.message);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+
+        return res.status(201).json({ success: true, data });
+    } catch (error) {
+        console.error('[ASSISTANT] create:', error.message);
+        return res.status(500).json({ success: false, error: error.message });
     }
 }
 
 async function getAssistant(req, res) {
     try {
-        const assistant = await assistantService.getAssistantById(req.params.id);
-        res.status(200).json(assistant);
-    } catch (err) {
-        res.status(404).json({ error: err.message });
+        const { data, error } = await supabase
+            .from('assistants')
+            .select('*')
+            .eq('business_id', req.user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) {
+            console.error('[ASSISTANT] get:', error.message);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        console.error('[ASSISTANT] get:', error.message);
+        return res.status(500).json({ success: false, error: error.message });
     }
 }
 
 async function updateAssistant(req, res) {
     try {
-        const { name, system_prompt } = req.body;
-        const assistant = await assistantService.updateAssistant({
-            assistant_id: req.params.id,
-            name,
-            system_prompt
+        const updates = { updated_at: new Date().toISOString() };
+
+        ['system_prompt', 'first_message', 'language', 'industry', 'name', 'status'].forEach((field) => {
+            if (req.body?.[field] !== undefined) {
+                updates[field] = req.body[field];
+            }
         });
-        res.status(200).json(assistant);
-    } catch (err) {
-        if (err.message === 'Assistant not found') return res.status(404).json({ error: err.message });
-        if (err.message === 'No fields to update') return res.status(400).json({ error: err.message });
-        res.status(500).json({ error: err.message });
+
+        const { data, error } = await supabase
+            .from('assistants')
+            .update(updates)
+            .eq('id', req.params.id)
+            .eq('business_id', req.user.id)
+            .select('*')
+            .single();
+
+        if (error) {
+            console.error('[ASSISTANT] update:', error.message);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+
+        return res.status(200).json({ success: true, data });
+    } catch (error) {
+        console.error('[ASSISTANT] update:', error.message);
+        return res.status(500).json({ success: false, error: error.message });
     }
 }
 
-async function deleteAssistant(req, res) {
-    try {
-        const result = await assistantService.deleteAssistant(req.params.id);
-        res.status(200).json(result);
-    } catch (err) {
-        if (err.message === 'Assistant not found') return res.status(404).json({ error: err.message });
-        res.status(500).json({ error: err.message });
-    }
-}
-
-module.exports = { createAssistant, getAssistants, getAssistant, updateAssistant, deleteAssistant };
+module.exports = {
+    createAssistant,
+    getAssistant,
+    updateAssistant,
+};
