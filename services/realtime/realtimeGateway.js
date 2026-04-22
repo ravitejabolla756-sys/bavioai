@@ -269,7 +269,6 @@ function createRealtimeGateway({ server }) {
         const requestUrl = new URL(req.url, `http://${req.headers.host}`);
 
         if (requestUrl.pathname !== '/realtime/ws') {
-            socket.destroy();
             return;
         }
 

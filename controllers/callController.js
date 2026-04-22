@@ -1,23 +1,35 @@
 const axios = require('axios');
 
 const { supabase } = require('../database/db');
-const { buildExoML } = require('../services/exotelService');
 const { getSession, setSession, updateSession, deleteSession } = require('../services/redisService');
-const { processTurn } = require('../services/orchestratorService');
-const { generateResponse } = require('../services/llmService');
+const { transcribeAudio } = require('../services/sttService');
+const { generateResponse, buildSystemPrompt } = require('../services/llmService');
+const { synthesizeSpeech } = require('../services/ttsService');
 const { sendLeadAlert } = require('../services/whatsappService');
 const { calculateCallCost } = require('../services/billingService');
+
+function escapeXml(value = '') {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+function exoResponse(body) {
+    return `<?xml version="1.0" encoding="UTF-8"?><Response>${body}</Response>`;
+}
 
 function normalizePhoneNumber(value) {
     return String(value || '').replace(/[^\d+]/g, '');
 }
 
-async function findBusinessPhoneNumber(toNumber) {
-    const normalizedTo = normalizePhoneNumber(toNumber);
+async function findPhoneNumberRecord(toNumber) {
     const { data, error } = await supabase
         .from('phone_numbers')
-        .select('*')
-        .eq('phone_number', normalizedTo)
+        .select('id, business_id, phone_number')
+        .eq('phone_number', normalizePhoneNumber(toNumber))
         .maybeSingle();
 
     if (error) {
@@ -27,7 +39,7 @@ async function findBusinessPhoneNumber(toNumber) {
     return data;
 }
 
-async function getAssistantConfig(businessId) {
+async function fetchAssistant(businessId) {
     const { data, error } = await supabase
         .from('assistants')
         .select('*')
@@ -41,49 +53,39 @@ async function getAssistantConfig(businessId) {
         throw error;
     }
 
-    return data || {
-        name: 'Bavio Assistant',
-        language: 'hi-IN',
-        first_message: 'Namaste! Main aapki kaise madad kar sakta hoon?',
-        industry: 'general',
-        system_prompt: '',
-    };
+    return data;
 }
 
-async function upsertLead({ businessId, callId, callerNumber, leadData }) {
-    if (!leadData) {
-        return null;
-    }
-
-    const { data: existing, error: existingError } = await supabase
-        .from('leads')
-        .select('*')
-        .eq('business_id', businessId)
-        .eq('call_id', callId)
-        .maybeSingle();
-
-    if (existingError) {
-        throw existingError;
+async function insertLeadIfCaptured(session, leadData, fallbackPhone) {
+    if (!leadData || session.lead_captured) {
+        return session.lead_data || null;
     }
 
     const payload = {
-        business_id: businessId,
-        call_id: callId,
-        name: leadData.name || existing?.name || null,
-        phone: leadData.phone || callerNumber || existing?.phone || null,
-        email: leadData.email || existing?.email || null,
-        intent: leadData.intent || existing?.intent || null,
-        budget: leadData.budget || existing?.budget || null,
-        location: leadData.location || existing?.location || null,
-        notes: leadData.notes || existing?.notes || null,
-        status: existing?.status || 'new',
+        business_id: session.business_id,
+        call_id: session.call_id,
+        name: leadData.name || null,
+        phone: leadData.phone || fallbackPhone || null,
+        intent: leadData.intent || null,
+        budget: leadData.budget || null,
+        location: leadData.location || null,
+        status: 'new',
     };
 
-    const query = existing
-        ? supabase.from('leads').update(payload).eq('id', existing.id)
-        : supabase.from('leads').insert([payload]);
+    const { error } = await supabase.from('leads').insert(payload);
+    if (error) {
+        throw error;
+    }
 
-    const { data, error } = await query.select('*').single();
+    return payload;
+}
+
+async function fetchBusinessForCall(businessId) {
+    const { data, error } = await supabase
+        .from('businesses')
+        .select('id, name, phone, plan, minutes_used, minutes_limit')
+        .eq('id', businessId)
+        .single();
 
     if (error) {
         throw error;
@@ -92,179 +94,241 @@ async function upsertLead({ businessId, callId, callerNumber, leadData }) {
     return data;
 }
 
+function buildRecordXml(actionUrl) {
+    return `<Record action="${escapeXml(actionUrl)}" maxLength="10" playBeep="false" fileFormat="wav"/>`;
+}
+
+function buildWebhookUrl(req, path) {
+    const configuredBaseUrl = String(process.env.WEBHOOK_BASE_URL || '').trim().replace(/\/$/, '');
+    if (configuredBaseUrl) {
+        return `${configuredBaseUrl}${path}`;
+    }
+
+    return `${req.protocol}://${req.get('host')}${path}`;
+}
+
 async function handleIncomingExotel(req, res) {
     try {
-        const callSid = req.body?.CallSid;
-        const from = normalizePhoneNumber(req.body?.From);
-        const to = normalizePhoneNumber(req.body?.To);
+        const { CallSid, From, To } = req.body;
+        console.log(`[EXOTEL] Incoming from ${From} to ${To}`);
 
-        const numberRecord = await findBusinessPhoneNumber(to);
-
-        if (!numberRecord) {
-            return res.status(404).type('application/xml').send(buildExoML('hangup'));
+        const phoneNum = await findPhoneNumberRecord(To);
+        if (!phoneNum) {
+            return res.type('text/xml').send(exoResponse('<Say>Sorry, this number is not active.</Say>'));
         }
+
+        const assistant = await fetchAssistant(phoneNum.business_id);
+        const firstMessage = assistant?.first_message || 'Namaste! Main aapki kaise madad kar sakta hoon?';
+        const language = assistant?.language || 'hi-IN';
+        const business = await fetchBusinessForCall(phoneNum.business_id);
 
         const { data: call, error: callError } = await supabase
             .from('calls')
-            .insert([{
-                business_id: numberRecord.business_id,
-                phone_number_id: numberRecord.id,
-                caller_number: from,
-                call_sid: callSid,
-                provider: 'exotel',
+            .insert({
+                business_id: phoneNum.business_id,
+                phone_number_id: phoneNum.id,
+                caller_number: normalizePhoneNumber(From),
+                call_sid: CallSid,
                 status: 'started',
-            }])
-            .select('*')
+                provider: 'exotel',
+            })
+            .select()
             .single();
 
         if (callError) {
-            console.error('[CALLS] incoming: call create failed', callError.message);
-            return res.status(500).json({ success: false, error: callError.message });
+            throw callError;
         }
 
-        await setSession(callSid, {
-            business_id: numberRecord.business_id,
+        await setSession(`call:${CallSid}`, {
+            business_id: phoneNum.business_id,
+            business_phone: business.phone || '',
+            caller_number: normalizePhoneNumber(From),
             call_id: call.id,
+            assistant_id: assistant?.id || null,
+            language,
             transcript: [],
             turn: 0,
+            lead_captured: false,
+            lead_data: null,
+            lead_alert_sent: false,
+            tts_chars_total: 0,
+            started_at: Date.now(),
         });
 
-        const assistant = await getAssistantConfig(numberRecord.business_id);
-        const actionUrl = `${process.env.WEBHOOK_BASE_URL}/calls/recording`;
+        try {
+            await synthesizeSpeech(firstMessage, language);
+        } catch (error) {
+            console.error('[CALLS] greeting synthesis failed:', error.message);
+        }
 
-        return res.status(200).type('application/xml').send(buildExoML([
-            { action: 'say', params: { text: assistant.first_message } },
-            { action: 'record', params: { action: actionUrl, maxLength: 10, playBeep: false } },
-        ]));
+        const greetingXml = `<Say voice="woman" language="${escapeXml(language)}">${escapeXml(firstMessage)}</Say>`;
+        const actionUrl = buildWebhookUrl(req, '/calls/recording');
+
+        return res.type('text/xml').send(exoResponse(`${greetingXml}${buildRecordXml(actionUrl)}`));
     } catch (error) {
-        console.error('[CALLS] incoming:', error.message);
+        console.error('[CALLS] incoming failed:', error.message);
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
 async function handleRecording(req, res) {
-    try {
-        const callSid = req.body?.CallSid;
-        const recordingUrl = req.body?.RecordingUrl;
-        const session = await getSession(callSid);
+    const { CallSid, RecordingUrl, RecordingDuration, From } = req.body;
+    console.log(`[EXOTEL] Recording for ${CallSid}, ${RecordingDuration || 0}s`);
 
+    try {
+        const sessionKey = `call:${CallSid}`;
+        const session = await getSession(sessionKey);
         if (!session) {
-            return res.status(404).json({ success: false, error: 'Session not found' });
+            return res.sendStatus(200);
         }
 
-        const [{ data: business }, { data: assistant }, { data: call }] = await Promise.all([
-            supabase.from('businesses').select('*').eq('id', session.business_id).single(),
-            supabase.from('assistants').select('*').eq('business_id', session.business_id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
-            supabase.from('calls').select('*').eq('id', session.call_id).single(),
+        const audioResponse = await axios.get(RecordingUrl, {
+            responseType: 'arraybuffer',
+            timeout: 10000,
+        });
+        const audioBuffer = Buffer.from(audioResponse.data);
+
+        let sttResult;
+        try {
+            sttResult = await transcribeAudio(audioBuffer, session.language || 'hi-IN');
+        } catch (error) {
+            console.error('[CALLS] recording STT failed:', error.message);
+            return res.type('text/xml').send(exoResponse(
+                '<Say voice="woman" language="hi">Maaf kijiye, awaaz saaf nahi mili. Kripya dobara boliye.</Say>'
+                + buildRecordXml(buildWebhookUrl(req, '/calls/recording'))
+            ));
+        }
+
+        const userText = String(sttResult.text || '').trim();
+        console.log(`[CALL] User said: "${userText.slice(0, 80)}"`);
+
+        if (!userText) {
+            return res.type('text/xml').send(exoResponse(
+                '<Say voice="woman" language="hi">Maaf kijiye, mujhe kuch samajh nahi aaya. Kripya dobara boliye.</Say>'
+                + buildRecordXml(buildWebhookUrl(req, '/calls/recording'))
+            ));
+        }
+
+        const nextTranscript = [...(session.transcript || []), { role: 'user', content: userText }];
+
+        const [{ data: business, error: businessError }, { data: assistant, error: assistantError }] = await Promise.all([
+            supabase.from('businesses').select('id, name, phone, plan').eq('id', session.business_id).single(),
+            supabase.from('assistants').select('*').eq('id', session.assistant_id).maybeSingle(),
         ]);
 
-        const audioResponse = await axios.get(recordingUrl, {
-            responseType: 'arraybuffer',
-            timeout: 30000,
-        });
-
-        const result = await processTurn({
-            callSid,
-            audioBuffer: Buffer.from(audioResponse.data),
-            sessionData: session,
-            assistantConfig: assistant || {
-                language: 'hi-IN',
-                industry: 'general',
-                system_prompt: '',
-                first_message: 'Namaste!',
-            },
-            business,
-        });
-
-        const lead = await upsertLead({
-            businessId: session.business_id,
-            callId: session.call_id,
-            callerNumber: call?.caller_number,
-            leadData: result.leadData,
-        });
-
-        await updateSession(callSid, {
-            latest_lead_id: lead?.id || null,
-            latest_response_text: result.responseText,
-        });
-
-        const recordAction = `${process.env.WEBHOOK_BASE_URL}/calls/recording`;
-        const actions = [];
-
-        if (result.responseAudio) {
-            actions.push({
-                action: 'play',
-                params: { url: `data:audio/wav;base64,${result.responseAudio}` },
-            });
-        } else {
-            actions.push({
-                action: 'say',
-                params: { text: result.responseText },
-            });
+        if (businessError) {
+            throw businessError;
+        }
+        if (assistantError) {
+            throw assistantError;
         }
 
-        if (result.shouldEnd) {
-            actions.push({ action: 'hangup', params: {} });
-        } else {
-            actions.push({
-                action: 'record',
-                params: { action: recordAction, maxLength: 10, playBeep: false },
+        const systemPrompt = buildSystemPrompt(assistant || {
+            language: session.language || 'hi-IN',
+            industry: 'general',
+            system_prompt: '',
+        }, business);
+
+        const llmResult = await generateResponse(nextTranscript, systemPrompt, assistant?.industry || 'general');
+
+        nextTranscript.push({
+            role: 'assistant',
+            content: llmResult.response_text,
+        });
+
+        let leadData = session.lead_data;
+        let leadCaptured = session.lead_captured;
+        let leadAlertSent = session.lead_alert_sent;
+
+        if (llmResult.lead_data && !leadCaptured) {
+            leadData = await insertLeadIfCaptured(session, llmResult.lead_data, normalizePhoneNumber(From));
+            leadCaptured = true;
+            session.lead_data = leadData;
+
+            sendLeadAlert(
+                session.business_phone,
+                leadData,
+                { duration: RecordingDuration || 0, caller_number: normalizePhoneNumber(From) }
+            ).then(() => {
+                updateSession(sessionKey, { lead_alert_sent: true }).catch((updateError) => {
+                    console.error('[CALLS] lead alert state update failed:', updateError.message);
+                });
+            }).catch((error) => {
+                console.error('[WA] Alert failed:', error.message);
             });
+            leadAlertSent = true;
         }
 
-        return res.status(200).type('application/xml').send(buildExoML(actions));
+        try {
+            await synthesizeSpeech(llmResult.response_text, session.language || 'hi-IN');
+        } catch (error) {
+            console.error('[CALLS] response synthesis failed:', error.message);
+        }
+
+        await updateSession(sessionKey, {
+            transcript: nextTranscript,
+            turn: Number(session.turn || 0) + 1,
+            lead_captured: leadCaptured,
+            lead_data: leadData,
+            lead_alert_sent: leadAlertSent,
+            tts_chars_total: Number(session.tts_chars_total || 0) + llmResult.response_text.length,
+        });
+
+        const responseXml = `<Say voice="woman" language="${escapeXml(session.language || 'hi-IN')}">${escapeXml(llmResult.response_text)}</Say>`;
+        if (llmResult.should_end) {
+            return res.type('text/xml').send(exoResponse(
+                `${responseXml}<Say voice="woman" language="hi">Dhanyawad! Hamara agent aapko jald contact karega.</Say><Hangup/>`
+            ));
+        }
+
+        return res.type('text/xml').send(exoResponse(
+            `${responseXml}${buildRecordXml(buildWebhookUrl(req, '/calls/recording'))}`
+        ));
     } catch (error) {
-        console.error('[CALLS] recording:', error.message);
-        return res.status(500).json({ success: false, error: error.message });
+        console.error('[CALLS] recording failed:', error.message);
+        return res.sendStatus(200);
     }
 }
 
 async function handleCallEnd(req, res) {
     try {
-        const callSid = req.body?.CallSid;
-        const duration = Number(req.body?.Duration || 0);
-        const session = await getSession(callSid);
+        const { CallSid, Duration } = req.body;
+        console.log(`[EXOTEL] Call ended: ${CallSid}, ${Duration}s`);
+
+        const sessionKey = `call:${CallSid}`;
+        const session = await getSession(sessionKey);
+        await deleteSession(sessionKey);
 
         if (!session) {
-            return res.status(200).json({ success: true, data: { message: 'Session already cleaned up' } });
+            return res.sendStatus(200);
         }
 
-        const transcript = Array.isArray(session.transcript) ? session.transcript : [];
-        const ttsChars = transcript
-            .filter((item) => item.role === 'assistant')
-            .reduce((sum, item) => sum + String(item.content || '').length, 0);
-        const costs = calculateCallCost(duration, ttsChars);
+        const durationSeconds = parseInt(Duration || '0', 10);
+        const durationMinutes = durationSeconds / 60;
+        const costs = calculateCallCost(durationSeconds, session.tts_chars_total || 0);
 
-        const { error: callUpdateError } = await supabase
+        await supabase
             .from('calls')
             .update({
                 status: 'completed',
-                duration,
-                cost: costs.cost_total,
+                duration: durationSeconds,
                 ended_at: new Date().toISOString(),
             })
-            .eq('id', session.call_id);
+            .eq('call_sid', CallSid);
 
-        if (callUpdateError) {
-            throw callUpdateError;
-        }
-
-        const { error: usageError } = await supabase
-            .from('usage_logs')
-            .insert([{
-                business_id: session.business_id,
-                call_id: session.call_id,
-                minutes_used: Math.ceil(duration / 60),
-                ...costs,
-            }]);
-
-        if (usageError) {
-            throw usageError;
-        }
+        await supabase.from('usage_logs').insert({
+            business_id: session.business_id,
+            call_id: session.call_id,
+            minutes_used: Math.ceil(durationMinutes),
+            cost_stt: costs.cost_stt,
+            cost_tts: costs.cost_tts,
+            cost_telephony: costs.cost_telephony,
+            cost_total: costs.cost_total,
+        });
 
         const { data: business, error: businessError } = await supabase
             .from('businesses')
-            .select('*')
+            .select('minutes_used, phone')
             .eq('id', session.business_id)
             .single();
 
@@ -275,83 +339,54 @@ async function handleCallEnd(req, res) {
         await supabase
             .from('businesses')
             .update({
-                minutes_used: Number(business.minutes_used || 0) + Math.ceil(duration / 60),
-                updated_at: new Date().toISOString(),
+                minutes_used: Number(business.minutes_used || 0) + Math.ceil(durationMinutes),
             })
             .eq('id', session.business_id);
 
-        const summaryPrompt = 'Summarize this sales or support phone call in 3 concise sentences.';
-        const summaryResult = await generateResponse(
-            transcript.map((item) => ({ role: item.role, content: item.content })),
-            summaryPrompt,
-            'general'
-        );
+        const summary = (session.transcript || []).length > 0
+            ? `Call with ${session.transcript.length} turns. ${session.lead_captured ? 'Lead captured.' : 'No lead captured.'}`
+            : 'Empty call.';
 
-        const { error: transcriptError } = await supabase
-            .from('transcripts')
-            .insert([{
-                call_id: session.call_id,
-                business_id: session.business_id,
-                transcript,
-                summary: summaryResult.response_text,
-            }]);
+        await supabase.from('transcripts').insert({
+            call_id: session.call_id,
+            business_id: session.business_id,
+            transcript: session.transcript || [],
+            summary,
+        });
 
-        if (transcriptError) {
-            throw transcriptError;
+        if (session.lead_captured && session.lead_data && !session.lead_alert_sent) {
+            sendLeadAlert(
+                session.business_phone || business.phone,
+                session.lead_data,
+                { duration: durationSeconds, caller_number: session.caller_number }
+            ).catch((error) => {
+                console.error('[WA] Final alert failed:', error.message);
+            });
         }
 
-        const { data: lead } = await supabase
-            .from('leads')
-            .select('*')
-            .eq('call_id', session.call_id)
-            .eq('business_id', session.business_id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-        if (lead && business.phone) {
-            await sendLeadAlert(business.phone, lead, { duration, caller_number: req.body?.From });
-        }
-
-        await deleteSession(callSid);
-
-        return res.status(200).json({ success: true, data: { message: 'Call processed' } });
+        return res.sendStatus(200);
     } catch (error) {
-        console.error('[CALLS] end:', error.message);
-        return res.status(500).json({ success: false, error: error.message });
+        console.error('[CALLS] end failed:', error.message);
+        return res.sendStatus(200);
     }
 }
 
-async function getCallsForBusiness(req, res) {
+async function getCalls(req, res) {
     try {
-        const page = Math.max(1, Number(req.query.page || 1));
-        const pageSize = Math.min(50, Math.max(1, Number(req.query.limit || 10)));
-        const from = (page - 1) * pageSize;
-        const to = from + pageSize - 1;
-
-        const { data, error, count } = await supabase
+        const { data, error } = await supabase
             .from('calls')
-            .select('*, transcripts(*), leads(*)', { count: 'exact' })
+            .select('id, caller_number, duration, status, created_at')
             .eq('business_id', req.user.id)
             .order('created_at', { ascending: false })
-            .range(from, to);
+            .limit(50);
 
         if (error) {
-            console.error('[CALLS] list:', error.message);
-            return res.status(500).json({ success: false, error: error.message });
+            throw error;
         }
 
-        return res.status(200).json({
-            success: true,
-            data: {
-                page,
-                page_size: pageSize,
-                total: count || 0,
-                calls: data || [],
-            },
-        });
+        return res.status(200).json({ success: true, data: data || [] });
     } catch (error) {
-        console.error('[CALLS] list:', error.message);
+        console.error('[CALLS] getCalls failed:', error.message);
         return res.status(500).json({ success: false, error: error.message });
     }
 }
@@ -360,14 +395,13 @@ async function getCallById(req, res) {
     try {
         const { data, error } = await supabase
             .from('calls')
-            .select('*, transcripts(*), leads(*)')
+            .select('*, transcripts(transcript, summary), leads(name, phone, intent, budget)')
             .eq('id', req.params.id)
             .eq('business_id', req.user.id)
             .maybeSingle();
 
         if (error) {
-            console.error('[CALLS] getById:', error.message);
-            return res.status(500).json({ success: false, error: error.message });
+            throw error;
         }
 
         if (!data) {
@@ -376,7 +410,7 @@ async function getCallById(req, res) {
 
         return res.status(200).json({ success: true, data });
     } catch (error) {
-        console.error('[CALLS] getById:', error.message);
+        console.error('[CALLS] getCallById failed:', error.message);
         return res.status(500).json({ success: false, error: error.message });
     }
 }
@@ -385,6 +419,6 @@ module.exports = {
     handleIncomingExotel,
     handleRecording,
     handleCallEnd,
-    getCallsForBusiness,
+    getCalls,
     getCallById,
 };

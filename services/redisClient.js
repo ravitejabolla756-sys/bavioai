@@ -1,46 +1,94 @@
 const { createClient } = require('redis');
 
-let redisClient;
-let connectionPromise;
+let redisClient = null;
+let connectionPromise = null;
+let hasLoggedRedisUrl = false;
 
-function buildRedisOptions(redisUrl) {
-    const parsedUrl = new URL(redisUrl);
-    const useTls = parsedUrl.protocol === 'rediss:' || parsedUrl.hostname.endsWith('upstash.io');
-    const normalizedUrl = useTls && parsedUrl.protocol === 'redis:'
-        ? redisUrl.replace(/^redis:\/\//i, 'rediss://')
-        : redisUrl;
+function getRedisUrl() {
+    const redisUrl = process.env.REDIS_URL;
 
-    return {
-        url: normalizedUrl,
+    if (!redisUrl) {
+        throw new Error('REDIS_URL is required for Redis connectivity.');
+    }
+
+    if (!hasLoggedRedisUrl) {
+        console.log('[REDIS URL]', redisUrl);
+        hasLoggedRedisUrl = true;
+    }
+
+    return redisUrl;
+}
+
+function buildRedisClient() {
+    const client = createClient({
+        url: getRedisUrl(),
         socket: {
-            tls: useTls,
+            tls: false,
             reconnectStrategy(retries) {
-                return Math.min(retries * 200, 2000);
+                const delay = Math.min(retries * 200, 2000);
+                console.warn(`[redis] reconnect attempt ${retries}, retrying in ${delay}ms`);
+                return delay;
             },
         },
-    };
+    });
+
+    client.on('connect', () => {
+        console.log('[redis] connecting');
+    });
+
+    client.on('ready', () => {
+        console.log('[redis] ready');
+    });
+
+    client.on('reconnecting', () => {
+        console.warn('[redis] reconnecting');
+    });
+
+    client.on('end', () => {
+        connectionPromise = null;
+        console.warn('[redis] connection closed');
+    });
+
+    client.on('error', (error) => {
+        console.error('[redis] error:', error.message);
+    });
+
+    return client;
 }
 
 async function getRedisClient() {
-    if (!process.env.REDIS_URL) {
-        throw new Error('REDIS_URL is required for realtime session storage.');
+    if (redisClient?.isReady) {
+        return redisClient;
     }
 
     if (!redisClient) {
-        redisClient = createClient(buildRedisOptions(process.env.REDIS_URL));
-
-        redisClient.on('error', (error) => {
-            console.error('[redis]', error.message);
-        });
-
-        connectionPromise = redisClient.connect();
+        redisClient = buildRedisClient();
     }
 
-    if (!redisClient.isOpen) {
-        await connectionPromise;
+    if (!connectionPromise) {
+        connectionPromise = redisClient.connect()
+            .then(() => redisClient)
+            .catch((error) => {
+                console.error('[redis] initial connection failed:', error.message);
+                connectionPromise = null;
+                redisClient = null;
+                throw error;
+            });
     }
 
+    await connectionPromise;
     return redisClient;
 }
 
-module.exports = { getRedisClient };
+async function initRedis() {
+    try {
+        const client = await getRedisClient();
+        console.log('[REDIS] Connected');
+        return client;
+    } catch (error) {
+        console.error('[REDIS] Failed to connect:', error.message);
+        throw error;
+    }
+}
+
+module.exports = { getRedisClient, initRedis };

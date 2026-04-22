@@ -2,6 +2,10 @@ const jwt = require('jsonwebtoken');
 
 function requireAuth(req, res, next) {
     try {
+        if (!process.env.JWT_SECRET) {
+            throw new Error('Missing JWT_SECRET');
+        }
+
         const authHeader = req.headers.authorization || '';
 
         if (!authHeader.startsWith('Bearer ')) {
@@ -16,8 +20,14 @@ function requireAuth(req, res, next) {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+        const businessId = decoded.business_id || decoded.id;
+        if (!businessId) {
+            return res.status(401).json({ success: false, error: 'Invalid token' });
+        }
+
         req.user = {
-            id: decoded.id,
+            id: businessId,
+            business_id: businessId,
             email: decoded.email,
         };
 

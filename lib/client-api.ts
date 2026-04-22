@@ -4,14 +4,18 @@ import axios from "axios";
 
 export const TOKEN_KEY = "bavio_jwt";
 
-export const BACKEND_URL =
+function normalizeBaseUrl(url?: string | null) {
+  return url ? url.replace(/\/+$/, "") : "";
+}
+
+export const BACKEND_URL = normalizeBaseUrl(
   process.env.NEXT_PUBLIC_BACKEND_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(":3000", ":5000") ||
-  "http://localhost:5000";
+  process.env.NEXT_PUBLIC_SITE_URL
+);
 
 export const clientApi = axios.create({
-  baseURL: BACKEND_URL,
+  baseURL: BACKEND_URL || undefined,
   withCredentials: true
 });
 

@@ -5,19 +5,22 @@ const { buildPrompt } = require('../utils/promptBuilder');
 const LLM_URL = 'https://api.sarvam.ai/v1/chat/completions';
 
 function extractLeadData(text) {
-    if (!text || !text.includes('[LEAD_CAPTURED]')) {
+    const marker = '[LEAD_CAPTURED]';
+    if (!text.includes(marker)) {
         return null;
     }
 
-    const jsonStart = text.indexOf('{');
-    const jsonEnd = text.lastIndexOf('}');
+    const markerIndex = text.indexOf(marker);
+    const afterMarker = text.slice(markerIndex + marker.length);
+    const jsonStart = afterMarker.indexOf('{');
+    const jsonEnd = afterMarker.lastIndexOf('}');
 
-    if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) {
+    if (jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
         return null;
     }
 
     try {
-        const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
+        const parsed = JSON.parse(afterMarker.slice(jsonStart, jsonEnd + 1));
         return {
             name: parsed.name || null,
             phone: parsed.phone || null,
@@ -28,21 +31,28 @@ function extractLeadData(text) {
             notes: parsed.notes || null,
         };
     } catch (error) {
-        console.error('[LLM] extractLeadData:', error.message);
+        console.error('[LLM] extractLeadData failed:', error.message);
         return null;
     }
 }
 
-async function generateResponse(messages, systemPrompt, industry = 'real_estate') {
+function stripMarkers(text) {
+    return text
+        .replace(/\[LEAD_CAPTURED\][\s\S]*$/m, '')
+        .replace(/\[END_CALL\]/g, '')
+        .trim();
+}
+
+async function generateResponse(messages, systemPrompt, industry = 'general') {
     try {
         const response = await axios.post(
             LLM_URL,
             {
-                model: 'sarvam-m',
+                model: process.env.SARVAM_LLM_MODEL || 'sarvam-m',
                 messages: [
                     {
                         role: 'system',
-                        content: `${systemPrompt} Industry: ${industry}.`,
+                        content: `${systemPrompt}\nIndustry: ${industry}.`,
                     },
                     ...messages,
                 ],
@@ -57,16 +67,21 @@ async function generateResponse(messages, systemPrompt, industry = 'real_estate'
             }
         );
 
-        const responseText = response.data?.choices?.[0]?.message?.content
+        const rawText = String(
+            response.data?.choices?.[0]?.message?.content
             || response.data?.response
-            || '';
+            || ''
+        ).trim();
+        const leadData = extractLeadData(rawText);
+        const shouldEnd = rawText.includes('[END_CALL]');
 
         return {
-            response_text: String(responseText).trim(),
-            lead_data: extractLeadData(String(responseText)),
+            response_text: stripMarkers(rawText),
+            lead_data: leadData,
+            should_end: shouldEnd,
         };
     } catch (error) {
-        console.error('[LLM] generateResponse:', error.message);
+        console.error('[LLM] generateResponse failed:', error.message);
         throw error;
     }
 }
