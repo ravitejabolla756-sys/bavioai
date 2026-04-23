@@ -19,27 +19,25 @@ type Overview = {
 
 type CallsResponse = {
   success: boolean;
-  data: {
-    calls: Array<{
-      id: string;
-      duration?: number | null;
-      created_at?: string | null;
-      leads?: Array<{ id: string }>;
-    }>;
-  };
+  data: Array<{
+    id: string;
+    duration?: number | null;
+    created_at?: string | null;
+    leads?: Array<{ id: string }>;
+  }>;
 };
 
 export default function DashboardAnalyticsPage() {
   const { token } = useAuth();
   const [overview, setOverview] = useState<Overview["data"] | null>(null);
-  const [calls, setCalls] = useState<CallsResponse["data"]["calls"]>([]);
+  const [calls, setCalls] = useState<CallsResponse["data"]>([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!token) return;
 
     Promise.all([
-      clientApi.get<Overview>("/api/dashboard/overview", {
+      clientApi.get<Overview>("/analytics/dashboard", {
         headers: { Authorization: `Bearer ${token}` }
       }),
       clientApi.get<CallsResponse>("/calls?limit=120", {
@@ -48,7 +46,7 @@ export default function DashboardAnalyticsPage() {
     ])
       .then(([overviewResponse, callsResponse]) => {
         setOverview(overviewResponse.data.data);
-        setCalls(callsResponse.data.data.calls || []);
+        setCalls(callsResponse.data.data || []);
       })
       .catch((fetchError) => setError(fetchError?.response?.data?.error || "Unable to load analytics."));
   }, [token]);

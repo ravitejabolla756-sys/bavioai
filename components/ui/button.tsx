@@ -13,9 +13,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border-[rgba(168,85,247,0.45)] bg-[linear-gradient(135deg,#7B2FBE_0%,#A855F7_100%)] text-white hover:-translate-y-0.5 hover:scale-[1.01] hover:brightness-110 hover:shadow-button",
+          "border-[rgba(124,58,237,0.45)] bg-[#7c3aed] text-white hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_18px_40px_rgba(124,58,237,0.28)]",
         ghost:
-          "border-transparent bg-transparent text-secondary hover:bg-[var(--bg-subtle)] hover:text-foreground",
+          "border-[var(--border-base)] bg-transparent text-[var(--text-primary)] hover:-translate-y-0.5 hover:border-[var(--text-faint)] hover:bg-[var(--bg-subtle)]",
         outline:
           "border-[rgba(123,47,190,0.4)] bg-surface text-foreground hover:border-primary hover:bg-[var(--bg-subtle)]",
         subtle:

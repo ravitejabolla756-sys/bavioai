@@ -312,7 +312,7 @@ export function EnterprisePage() {
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button size="lg" asChild>
-              <Link href="/sign-up">Start free on Professional</Link>
+                <Link href="/signup">Start free on Professional</Link>
             </Button>
             <Button size="lg" variant="ghost" asChild>
               <Link href="/pricing">Compare all plans</Link>

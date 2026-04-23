@@ -1,4 +1,8 @@
 const supabase = require('../database/db');
+const { v4: uuidv4 } = require('uuid');
+const voiceOrchestrator = require('./orchestrator/voiceOrchestrator');
+
+const activeCalls = new Map();
 
 async function getCallsForClient(client_id) {
     const { data: phoneNumbers, error: phoneErr } = await supabase
@@ -77,4 +81,48 @@ async function getUsageForClient(client_id) {
     };
 }
 
-module.exports = { getCallsForClient, getUsageForClient };
+/**
+ * Start a new call session.
+ */
+function startCall(callSid) {
+    const sessionId = uuidv4();
+    const callData = {
+        sessionId,
+        callSid,
+        startTime: new Date().toISOString()
+    };
+    activeCalls.set(sessionId, callData);
+    console.log("Call started:", sessionId);
+    return sessionId;
+}
+
+/**
+ * Handle user speech by forwarding to the voice orchestrator.
+ */
+async function handleUserSpeech(sessionId, transcript) {
+    console.log("User transcript:", transcript);
+    const response = await voiceOrchestrator.handleVoiceTurn(sessionId, transcript);
+    console.log("AI response generated");
+    return response;
+}
+
+/**
+ * End a call session and clean up.
+ */
+function endCall(sessionId) {
+    const cleared = activeCalls.delete(sessionId);
+    if (cleared) {
+        voiceOrchestrator.endSession(sessionId);
+        console.log("Call ended and session cleared:", sessionId);
+    }
+    return cleared;
+}
+
+module.exports = { 
+    getCallsForClient, 
+    getUsageForClient,
+    startCall,
+    handleUserSpeech,
+    endCall,
+    activeCalls
+};

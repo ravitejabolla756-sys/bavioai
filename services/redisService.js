@@ -21,13 +21,27 @@ redis.on('error', (error) => {
     console.error('[REDIS] error:', error.message);
 });
 
+function sessionKey(callSid) {
+    return String(callSid || '').startsWith('call:')
+        ? String(callSid)
+        : `call:${callSid}`;
+}
+
+async function ensureRedisConnection() {
+    if (redis.status === 'ready') {
+        return redis;
+    }
+
+    if (redis.status === 'wait') {
+        await redis.connect();
+    }
+
+    return redis;
+}
+
 async function connectRedis() {
     try {
-        if (redis.status === 'ready') {
-            return redis;
-        }
-
-        await redis.connect();
+        await ensureRedisConnection();
         await redis.ping();
         console.log('[REDIS] connection: ok');
         return redis;
@@ -39,20 +53,22 @@ async function connectRedis() {
 
 async function getSession(callSid) {
     try {
-        const data = await redis.get(`call:${callSid}`);
+        await ensureRedisConnection();
+        const data = await redis.get(sessionKey(callSid));
         return data ? JSON.parse(data) : null;
     } catch (error) {
-        console.error('[REDIS] getSession:', error.message);
+        console.error('[REDIS] getSession failed:', error.message);
         throw error;
     }
 }
 
 async function setSession(callSid, data) {
     try {
-        await redis.set(`call:${callSid}`, JSON.stringify(data), 'EX', 3600);
+        await ensureRedisConnection();
+        await redis.set(sessionKey(callSid), JSON.stringify(data), 'EX', 3600);
         return data;
     } catch (error) {
-        console.error('[REDIS] setSession:', error.message);
+        console.error('[REDIS] setSession failed:', error.message);
         throw error;
     }
 }
@@ -64,26 +80,28 @@ async function updateSession(callSid, updates) {
         await setSession(callSid, merged);
         return merged;
     } catch (error) {
-        console.error('[REDIS] updateSession:', error.message);
+        console.error('[REDIS] updateSession failed:', error.message);
         throw error;
     }
 }
 
 async function deleteSession(callSid) {
     try {
-        await redis.del(`call:${callSid}`);
+        await ensureRedisConnection();
+        await redis.del(sessionKey(callSid));
     } catch (error) {
-        console.error('[REDIS] deleteSession:', error.message);
+        console.error('[REDIS] deleteSession failed:', error.message);
         throw error;
     }
 }
 
 async function sessionExists(callSid) {
     try {
-        const exists = await redis.exists(`call:${callSid}`);
+        await ensureRedisConnection();
+        const exists = await redis.exists(sessionKey(callSid));
         return exists === 1;
     } catch (error) {
-        console.error('[REDIS] sessionExists:', error.message);
+        console.error('[REDIS] sessionExists failed:', error.message);
         throw error;
     }
 }

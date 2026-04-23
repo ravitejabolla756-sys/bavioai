@@ -111,7 +111,7 @@ export default function IndustryUseCasePage({ params }: Params) {
               Keep every inbound enquiry answered, qualified, and routed to the next human step.
             </p>
             <Button asChild className="mt-6">
-              <Link href="/sign-up">Start Free Trial</Link>
+                <Link href="/signup">Start Free Trial</Link>
             </Button>
           </Card>
         </div>

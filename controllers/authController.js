@@ -9,6 +9,7 @@ const {
     clearStateCookie,
     exchangeCodeForToken,
     fetchGoogleUserProfile,
+    getBaseOrigin,
     setStateCookie,
     validateState,
 } = require('../services/googleAuthService');
@@ -35,7 +36,7 @@ function normalizeBusinessRow(row = {}, generatedApiKey = null) {
 
 function signAuthToken(business) {
     return jwt.sign(
-        { id: business.id, email: business.email },
+        { id: business.id, business_id: business.id, email: business.email },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
     );
@@ -51,6 +52,101 @@ function setAuthCookie(res, token) {
 function ensureJwtSecret() {
     if (!process.env.JWT_SECRET) {
         throw new Error('Missing JWT_SECRET');
+    }
+}
+
+function getFrontendOrigin(req) {
+    return getBaseOrigin(req) || process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+}
+
+function buildBusinessInsertPayload({ id, name, email, phone, passwordHash, generatedApiKey }) {
+    return {
+        id,
+        name,
+        email,
+        phone,
+        password_hash: passwordHash,
+        api_key: generatedApiKey,
+        plan: 'starter',
+        status: 'active',
+        country: 'IN',
+        minutes_used: 0,
+        minutes_limit: 200,
+    };
+}
+
+async function ensureBusinessRecord({
+    userId,
+    name,
+    email,
+    phone,
+    passwordHash,
+    generatedApiKey,
+}) {
+    const { data: existingBusiness, error: fetchError } = await supabase
+        .from('businesses')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+    if (fetchError) {
+        throw new Error(fetchError.message);
+    }
+
+    if (existingBusiness) {
+        return existingBusiness;
+    }
+
+    const fullInsertPayload = buildBusinessInsertPayload({
+        id: userId,
+        name,
+        email,
+        phone,
+        passwordHash,
+        generatedApiKey,
+    });
+
+    let insertResult = await supabase
+        .from('businesses')
+        .insert([fullInsertPayload])
+        .select('*')
+        .single();
+
+    if (insertResult.error && String(insertResult.error.message || '').includes('schema cache')) {
+        insertResult = await supabase
+            .from('businesses')
+            .insert([{
+                id: fullInsertPayload.id,
+                name: fullInsertPayload.name,
+                email: fullInsertPayload.email,
+                phone: fullInsertPayload.phone,
+                password_hash: fullInsertPayload.password_hash,
+                plan: fullInsertPayload.plan,
+                status: fullInsertPayload.status,
+                country: fullInsertPayload.country,
+                minutes_used: fullInsertPayload.minutes_used,
+                minutes_limit: fullInsertPayload.minutes_limit,
+            }])
+            .select('*')
+            .single();
+    }
+
+    if (insertResult.error || !insertResult.data) {
+        throw new Error(insertResult.error?.message || 'Unable to create business record');
+    }
+
+    return insertResult.data;
+}
+
+async function rollbackAuthUser(userId) {
+    if (!userId) {
+        return;
+    }
+
+    const { error } = await supabase.auth.admin.deleteUser(userId);
+
+    if (error) {
+        console.error('[AUTH] rollback: failed to delete auth user', error.message);
     }
 }
 
@@ -216,45 +312,43 @@ async function signup(req, res) {
 
         const passwordHash = await bcrypt.hash(normalizedPassword, 10);
         const generatedApiKey = generateApiKey();
-        const fullInsertPayload = {
-            id: randomUUID(),
-            name: normalizedName,
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email: normalizedEmail,
-            phone: normalizedPhone,
-            password_hash: passwordHash,
-            api_key: generatedApiKey,
-            plan: 'starter',
-            status: 'active',
-            country: 'IN',
-            minutes_used: 0,
-            minutes_limit: 200,
-        };
+            password: normalizedPassword,
+            email_confirm: true,
+            user_metadata: {
+                name: normalizedName,
+                phone: normalizedPhone,
+            },
+        });
 
-        let insertResult = await supabase
-            .from('businesses')
-            .insert([fullInsertPayload])
-            .select('*')
-            .single();
-
-        if (insertResult.error && String(insertResult.error.message || '').includes('schema cache')) {
-            insertResult = await supabase
-                .from('businesses')
-                .insert([{
-                    name: normalizedName,
-                    email: normalizedEmail,
-                    phone: normalizedPhone,
-                    password_hash: passwordHash,
-                    plan: 'starter',
-                    status: 'active',
-                }])
-                .select('*')
-                .single();
+        if (authError) {
+            console.error('[AUTH] signup: auth user creation failed', authError.message);
+            const duplicateEmail = /already.*registered|already.*exists|duplicate/i.test(String(authError.message || ''));
+            return res.status(duplicateEmail ? 409 : 500).json({ success: false, error: authError.message });
         }
 
-        const { data, error } = insertResult;
+        const authUser = authData?.user;
 
-        if (error) {
-            console.error('[AUTH] signup: insert failed', error.message);
+        if (!authUser?.id) {
+            console.error('[AUTH] signup: auth user missing id');
+            return res.status(500).json({ success: false, error: 'Unable to create signup user' });
+        }
+
+        let business;
+
+        try {
+            business = await ensureBusinessRecord({
+                userId: authUser.id,
+                name: normalizedName,
+                email: normalizedEmail,
+                phone: normalizedPhone,
+                passwordHash,
+                generatedApiKey,
+            });
+        } catch (error) {
+            await rollbackAuthUser(authUser.id);
+            console.error('[AUTH] signup: business insert failed', error.message);
             return res.status(500).json({ success: false, error: error.message });
         }
 
@@ -262,7 +356,7 @@ async function signup(req, res) {
             success: true,
             data: {
                 message: 'Signup successful',
-                user: normalizeBusinessRow(data, generatedApiKey),
+                user: normalizeBusinessRow(business, generatedApiKey),
             },
         });
     } catch (error) {
@@ -331,7 +425,7 @@ async function startGoogleAuth(req, res) {
         return res.redirect(url);
     } catch (error) {
         console.error('[AUTH] google start:', error.message);
-        const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const frontendUrl = getFrontendOrigin(req);
         const redirectUrl = new URL('/login', frontendUrl);
         redirectUrl.searchParams.set('error', error.message);
         return res.redirect(redirectUrl.toString());
@@ -376,7 +470,7 @@ async function googleCallback(req, res) {
         const { business, generatedApiKey } = await syncGoogleBusiness(normalizedProfile);
         const authToken = signAuthToken(business);
         setAuthCookie(res, authToken);
-        const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const frontendUrl = getFrontendOrigin(req);
         const redirectUrl = new URL('/dashboard', frontendUrl);
         redirectUrl.searchParams.set('token', authToken);
         if (generatedApiKey) {
@@ -387,7 +481,7 @@ async function googleCallback(req, res) {
     } catch (error) {
         clearStateCookie(res);
         console.error('[AUTH] google callback:', error.response?.data || error.message);
-        const frontendUrl = process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const frontendUrl = getFrontendOrigin(req);
         const redirectUrl = new URL('/login', frontendUrl);
         redirectUrl.searchParams.set('error', error.response?.data?.error_description || error.response?.data?.error || error.message);
         return res.redirect(redirectUrl.toString());

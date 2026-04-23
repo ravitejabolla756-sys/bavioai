@@ -143,7 +143,7 @@ export function IntegrationsPage() {
                     </span>
                     {integration.status === "live" ? (
                       <Button asChild size="sm" variant="ghost" className="h-8 text-xs">
-                        <Link href="/sign-up">Connect <ArrowRight className="ml-1 h-3 w-3" /></Link>
+                <Link href="/signup">Connect <ArrowRight className="ml-1 h-3 w-3" /></Link>
                       </Button>
                     ) : (
                       <span className="text-xs text-[var(--text-muted)]">{statusLabel[integration.status]}</span>

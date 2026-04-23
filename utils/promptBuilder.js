@@ -1,51 +1,37 @@
 function industryPrompt(industry) {
     const prompts = {
-        real_estate: [
-            'You are an India-first AI phone assistant for a real estate business.',
-            'Capture budget, preferred location, BHK requirement, and buying timeline.',
-            'Qualify whether the caller wants purchase, rent, or site visit.',
-        ],
-        clinic: [
-            'You are an AI receptionist for a clinic.',
-            'Capture patient name, primary issue, preferred appointment time, and urgency.',
-        ],
-        edtech: [
-            'You are an AI counselor for an edtech business.',
-            'Capture course interest, learner goal, budget, and preferred class timing.',
-        ],
-        restaurant: [
-            'You are an AI host for a restaurant.',
-            'Capture reservation date, time, party size, and special requests.',
-        ],
-        ecommerce: [
-            'You are an AI support assistant for an ecommerce store.',
-            'Capture order intent, product interest, budget, and delivery location.',
-        ],
-        general: [
-            'You are an AI phone assistant for a business.',
-            'Capture the caller name, phone, intent, and any important notes.',
-        ],
+        real_estate: 'Capture: buyer budget, preferred location, BHK type, ready-to-move or under-construction, timeline.',
+        clinic: 'Capture: patient name, phone, health issue, preferred appointment time.',
+        edtech: 'Capture: student name, phone, course interest, current qualification, budget.',
+        restaurant: 'Capture: customer name, phone, reservation date/time, party size.',
+        general: 'Capture: caller name, phone, and reason for calling.',
     };
 
-    return (prompts[industry] || prompts.general).join(' ');
+    return prompts[industry] || prompts.general;
 }
 
 function buildPrompt({ assistant, business }) {
-    const industry = assistant?.industry || 'general';
+    const businessName = business?.name || 'Bavio business';
     const language = assistant?.language || 'hi-IN';
-    const basePrompt = assistant?.system_prompt || '';
+    const industry = assistant?.industry || 'general';
+    const customPrompt = String(assistant?.system_prompt || '').trim();
 
     return [
-        `Business name: ${business?.name || 'Bavio customer'}.`,
-        `Business country: ${business?.country || 'IN'}.`,
-        `Conversation language: ${language}.`,
+        `You are an AI voice assistant for ${businessName}.`,
+        `Speak naturally in ${language} (Hindi/Hinglish/English).`,
+        'Keep responses SHORT — max 2 sentences per turn.',
+        'Be warm, helpful, and professional.',
+        '',
+        'When you have captured: name, phone, and at least one of (budget / intent / location / appointment_time), add to your response on a NEW LINE:',
+        '[LEAD_CAPTURED]',
+        '{"name":"...","phone":"...","intent":"...","budget":"...","location":"..."}',
+        '',
+        'When the conversation is naturally complete, add:',
+        '[END_CALL]',
+        '',
         industryPrompt(industry),
-        'Be concise, polite, and natural in Hindi, English, or Hinglish based on the caller language.',
-        'Always try to qualify the lead and collect useful business details.',
-        basePrompt,
-        'When you have captured all required information, respond with: [LEAD_CAPTURED] followed by JSON: { name, phone, intent, budget, location, notes }',
-        'When call should end naturally, respond with: [END_CALL]',
-    ].filter(Boolean).join(' ');
+        customPrompt,
+    ].filter(Boolean).join('\n');
 }
 
 module.exports = { buildPrompt };

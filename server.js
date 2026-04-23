@@ -1,20 +1,31 @@
 require('dotenv').config();
 
-const cors = require('cors');
+const http = require('http');
+const next = require('next');
 const express = require('express');
+const cors = require('cors');
 
 const { testConnection } = require('./database/db');
 const { apiRateLimit } = require('./middleware/rateLimit');
-const { connectRedis } = require('./services/redisService');
+const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/user');
+const realtimeRoutes = require('./routes/realtime');
 const callRoutes = require('./routes/calls');
 const assistantRoutes = require('./routes/assistants');
 const leadRoutes = require('./routes/leads');
 const analyticsRoutes = require('./routes/analytics');
 const billingRoutes = require('./routes/billing');
+const { createRealtimeGateway } = require('./services/realtime/realtimeGateway');
+const { initRedis } = require('./services/redisClient');
 
 const app = express();
+const PORT = Number(process.env.PORT) || 3000;
+const dev = process.env.NODE_ENV !== 'production';
+const nextApp = next({ dev, hostname: '0.0.0.0', port: PORT });
+const handle = nextApp.getRequestHandler();
+
+app.set('trust proxy', true);
 
 const allowedOrigins = [
     process.env.FRONTEND_URL,
@@ -23,91 +34,78 @@ const allowedOrigins = [
     'https://bavio.in',
 ].filter(Boolean);
 
-app.use(cors({
-    origin(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
+const apiMiddlewares = [
+    cors({
+        origin(origin, callback) {
+            if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+                callback(null, true);
+                return;
+            }
 
-        return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-}));
-app.use(express.json({
-    limit: '25mb',
-    verify: (req, res, buffer) => {
-        req.rawBody = buffer;
-    },
-}));
-app.use(express.urlencoded({ extended: true }));
-app.use(apiRateLimit);
-
-app.get('/', async (req, res) => {
-    return res.status(200).json({
-        success: true,
-        data: {
-            service: 'Bavio AI Backend',
-            status: 'ok',
+            callback(new Error('Not allowed by CORS'));
         },
+        credentials: true,
+    }),
+    express.json({
+        limit: '25mb',
+        verify: (req, res, buffer) => {
+            req.rawBody = buffer;
+        },
+    }),
+    express.urlencoded({ extended: true }),
+    apiRateLimit,
+];
+
+app.get('/api', ...apiMiddlewares, (req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'Bavio.ai',
+        capabilities: ['website', 'auth', 'calls', 'realtime-voice'],
     });
 });
 
-app.use('/auth', authRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api', userRoutes);
-app.use('/calls', callRoutes);
-app.use('/assistants', assistantRoutes);
-app.use('/leads', leadRoutes);
-app.use('/analytics', analyticsRoutes);
-app.use('/billing', billingRoutes);
+app.use('/health', ...apiMiddlewares, healthRoutes);
+app.use('/api/health', ...apiMiddlewares, healthRoutes);
+app.use('/auth', ...apiMiddlewares, authRoutes);
+app.use('/api/auth', ...apiMiddlewares, authRoutes);
+app.use('/user', ...apiMiddlewares, userRoutes);
+app.use('/api', ...apiMiddlewares, userRoutes);
+app.use('/realtime', ...apiMiddlewares, realtimeRoutes);
+app.use('/calls', ...apiMiddlewares, callRoutes);
+app.use('/assistants', ...apiMiddlewares, assistantRoutes);
+app.use('/leads', ...apiMiddlewares, leadRoutes);
+app.use('/analytics', ...apiMiddlewares, analyticsRoutes);
+app.use('/billing', ...apiMiddlewares, billingRoutes);
 
-function logRoutes() {
-    [
-        'GET /auth/google',
-        'GET /auth/google/callback',
-        'GET /auth/callback/google',
-        'GET /api/auth/google',
-        'GET /api/auth/google/callback',
-        'GET /api/auth/callback/google',
-        'GET /api/me',
-        'GET /api/dashboard/overview',
-        'POST /auth/signup',
-        'POST /auth/login',
-        'GET /auth/profile',
-        'PUT /auth/profile',
-        'POST /calls/incoming',
-        'POST /calls/recording',
-        'POST /calls/end',
-        'GET /calls',
-        'GET /calls/:id',
-        'POST /assistants',
-        'GET /assistants',
-        'PUT /assistants/:id',
-        'GET /leads',
-        'PUT /leads/:id',
-        'GET /analytics/dashboard',
-        'POST /billing/subscribe',
-        'POST /billing/webhook',
-        'GET /billing/usage',
-    ].forEach((route) => console.log(`[SERVER] route: ${route}`));
-}
+app.all('*', (req, res) => handle(req, res));
 
-async function bootstrap() {
+const server = http.createServer(app);
+const realtimeGateway = createRealtimeGateway({ server });
+
+const serverReady = (async () => {
     try {
-        await connectRedis();
+        await nextApp.prepare();
         await testConnection();
-
-        const port = Number(process.env.PORT || 5000);
-        app.listen(port, () => {
-            console.log(`[SERVER] listen: ${port}`);
-            logRoutes();
-        });
     } catch (error) {
-        console.error('[SERVER] bootstrap: failed', error.message);
+        console.error('[STARTUP] Initialization failed:', error.message);
         process.exit(1);
     }
-}
 
-bootstrap();
+    try {
+        await initRedis();
+    } catch (error) {
+        console.warn('[REDIS] Startup validation failed. Continuing without realtime session storage.');
+    }
 
-module.exports = { app };
+    return await new Promise((resolve) => {
+        server.listen(PORT, () => {
+            console.log(`Bavio.ai server listening on port ${PORT}`);
+            console.log('Mounted routes: /health /auth /api/auth /user /api /realtime /calls /assistants /leads /analytics /billing');
+            console.log('Next.js pages ready on the same origin');
+            console.log('Realtime WebSocket endpoint ready at /realtime/ws');
+            resolve(server);
+        });
+    });
+})();
+
+module.exports = { app, server, realtimeGateway, serverReady, nextApp };

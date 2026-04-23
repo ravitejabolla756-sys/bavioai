@@ -25,18 +25,19 @@ class SarvamSttProvider {
             () => this.client.connect({
                 'Api-Subscription-Key': this.apiKey,
                 'language-code': languageCode || 'en-IN',
-                model: 'saaras:v3',
+                model: 'saarika:v1',
                 input_audio_codec: 'pcm_s16le',
                 sample_rate: String(sampleRate || 16000),
                 high_vad_sensitivity: 'true',
                 vad_signals: 'true',
                 flush_signal: 'true',
             }),
-            { label: 'sarvam-stt-connect' }
+            { label: 'sarvam-stt-connect', retries: 3, baseDelayMs: 1000 }
         );
 
         socket.on('message', (message) => {
             if (message.type === 'data' && message.data?.transcript) {
+                console.log(`[STT] Result: "${String(message.data.transcript).trim().slice(0, 80)}${String(message.data.transcript).trim().length > 80 ? '...' : ''}"`);
                 onTranscript(message.data);
                 return;
             }
@@ -69,6 +70,8 @@ class SarvamSttProvider {
                     return;
                 }
 
+                const audioBuffer = Buffer.from(audioBase64, 'base64');
+                console.log(`[STT] Transcribing ${audioBuffer.length} bytes`);
                 const wavAudio = wrapPcmAsWav(Buffer.from(audioBase64, 'base64'), sampleRate || 16000);
                 socket.transcribe({
                     audio: wavAudio.toString('base64'),

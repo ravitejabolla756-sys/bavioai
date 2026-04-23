@@ -97,6 +97,14 @@ export function LoginForm() {
       </div>
 
       <GoogleAuthButton />
+
+      <p className="text-center text-xs leading-6 text-[var(--text-muted)]">
+        Need an account?{" "}
+        <Link href="/signup" className="text-[var(--brand)] transition hover:text-[var(--text-primary)]">
+          Start your free trial
+        </Link>
+        .
+      </p>
     </form>
   );
 }

@@ -161,7 +161,7 @@ export function CustomersPage() {
           </p>
           <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
             <Button size="lg" asChild>
-              <Link href="/sign-up">Start free today</Link>
+                <Link href="/signup">Start free today</Link>
             </Button>
             <Button size="lg" variant="ghost" asChild>
               <Link href="/contact">Talk to our team</Link>

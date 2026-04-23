@@ -36,7 +36,7 @@ export default function ChangelogPage() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild>
-                <Link href="/sign-up">Try what&apos;s new</Link>
+                <Link href="/signup">Try what&apos;s new</Link>
               </Button>
               <Button variant="ghost" asChild>
                 <Link href="#subscribe">
