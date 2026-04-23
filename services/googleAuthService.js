@@ -10,6 +10,10 @@ const GOOGLE_STATE_COOKIE = 'bavio_google_oauth_state';
 const GOOGLE_STATE_MAX_AGE_MS = 10 * 60 * 1000;
 const GOOGLE_SCOPES = ['openid', 'email', 'profile'];
 
+function readEnv(name) {
+    return String(process.env[name] || '').trim();
+}
+
 function getBaseOrigin(req) {
     const forwardedProto = req.headers['x-forwarded-proto'];
     const protocol = Array.isArray(forwardedProto)
@@ -25,7 +29,7 @@ function getBaseOrigin(req) {
 }
 
 function requireGoogleClientEnv() {
-    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientId = readEnv('GOOGLE_CLIENT_ID');
 
     if (!clientId) {
         throw new Error('Missing GOOGLE_CLIENT_ID');
@@ -35,9 +39,9 @@ function requireGoogleClientEnv() {
 }
 
 function requireGoogleTokenEnv(originFallback) {
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || (originFallback ? `${originFallback}/auth/google/callback` : '');
+    const clientId = readEnv('GOOGLE_CLIENT_ID');
+    const clientSecret = readEnv('GOOGLE_CLIENT_SECRET');
+    const redirectUri = readEnv('GOOGLE_REDIRECT_URI') || (originFallback ? `${originFallback}/auth/google/callback` : '');
 
     if (!clientId || !clientSecret || !redirectUri) {
         throw new Error('Missing Google OAuth token environment variables');
@@ -112,7 +116,7 @@ function validateState(req, stateFromQuery) {
 
 function buildGoogleOAuthUrl(req) {
     const { clientId } = requireGoogleClientEnv();
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${getBaseOrigin(req)}/auth/google/callback`;
+    const redirectUri = readEnv('GOOGLE_REDIRECT_URI') || `${getBaseOrigin(req)}/auth/google/callback`;
 
     if (!redirectUri) {
         throw new Error('Missing GOOGLE_REDIRECT_URI');

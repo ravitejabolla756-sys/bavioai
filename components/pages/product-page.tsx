@@ -166,7 +166,7 @@ await client.post("/agents", {
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg">
-                  <Link href="/sign-up">
+                  <Link href="/signup">
                     Start Building Free
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>

@@ -19,6 +19,12 @@ export function PricingCards({
       {PRICING_TIERS.map((tier) => {
         const featured = tier.featured;
         const price = yearly ? tier.yearly : tier.monthly;
+        const signupHref =
+          tier.name === "Starter"
+            ? "/signup?plan=starter"
+            : tier.name === "Growth"
+              ? "/signup?plan=growth"
+              : "/signup?plan=scale";
         return (
           <div key={tier.slug} className="relative pt-5">
             {featured ? (
@@ -54,7 +60,7 @@ export function PricingCards({
                 size={compact ? "default" : "lg"}
                 asChild
               >
-                <Link href="/sign-up">
+                <Link href={signupHref}>
                   {tier.name === "Enterprise" ? "Talk to sales" : compact ? "Start free" : `Choose ${tier.name}`}
                 </Link>
               </Button>

@@ -1,0 +1,8 @@
+
+> bavio-ai@1.0.0 start
+> node server.js
+
+[dotenv@17.3.1] injecting env (19) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+Bavio.ai server listening on port 5000
+Realtime WebSocket endpoint ready at /realtime/ws

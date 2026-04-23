@@ -53,11 +53,11 @@ export default function LoginPage({
               <LoginForm />
               <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
                 Don&apos;t have an account?{" "}
-                <Link href="/sign-up" className="text-[var(--brand)] transition hover:text-[var(--text-primary)]">
-                  Start free
-                </Link>
-              </p>
-            </Card>
+                  <Link href="/signup" className="text-[var(--brand)] transition hover:text-[var(--text-primary)]">
+                    Start free
+                  </Link>
+                </p>
+              </Card>
           </div>
 
           <div className="relative hidden border-l border-[var(--border-base)] bg-[radial-gradient(circle_at_top,rgba(123,47,190,0.14),transparent_34%),var(--bg-raised)] lg:flex lg:flex-col lg:justify-center lg:px-16 xl:px-24">

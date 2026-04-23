@@ -39,7 +39,7 @@ export const FOOTER_LINKS = {
   Company: [
     { label: "About", href: "/company" },
     { label: "Careers", href: "/company#hiring" },
-    { label: "Start Free", href: "/sign-up" }
+    { label: "Start Free", href: "/signup" }
   ],
   Legal: [
     { label: "Privacy Policy", href: "/privacy" },

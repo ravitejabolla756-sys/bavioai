@@ -135,7 +135,17 @@ export function PricingPageContent() {
                 ))}
               </div>
               <Button asChild variant={plan.ghost ? "ghost" : "default"} className="mt-8 w-full">
-                <Link href={plan.name === "Scale" ? "/contact" : "/sign-up"}>{plan.cta}</Link>
+                <Link
+                  href={
+                    plan.name === "Starter"
+                      ? "/signup?plan=starter"
+                      : plan.name === "Growth"
+                        ? "/signup?plan=growth"
+                        : "/signup?plan=scale"
+                  }
+                >
+                  Get Started
+                </Link>
               </Button>
             </Card>
           ))}

@@ -71,18 +71,21 @@ export default function DocsPage() {
                 <h2 className="text-2xl font-bold text-[var(--text-primary)]">Your first AI agent</h2>
                 <CodeBlock
                   language="JavaScript"
-                  code={`import axios from "axios";
+                  code={`const token = localStorage.getItem("bavio_token");
 
-const token = localStorage.getItem("bavio_jwt");
-
-await axios.post("https://api.bavio.in/assistants", {
+await fetch("https://api.bavio.in/assistants", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: \`Bearer \${token}\`
+  },
+  body: JSON.stringify({
   name: "Bavio Front Desk",
   language: "Hinglish",
   industry: "Real Estate",
   first_message: "Namaste! Main aapki kaise madad kar sakta hoon?",
   system_prompt: "Capture lead details and qualify intent."
-}, {
-  headers: { Authorization: \`Bearer \${token}\` }
+  })
 });`}
                 />
               </section>

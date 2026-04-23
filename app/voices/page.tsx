@@ -247,7 +247,7 @@ export default function VoicesPage() {
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button size="lg" asChild>
-              <Link href="/sign-up">Start building free</Link>
+                  <Link href="/signup">Start building free</Link>
             </Button>
             <Button size="lg" variant="ghost" asChild>
               <Link href="/playground">Test in the playground</Link>
