@@ -18,6 +18,15 @@ type AuthUser = {
   created_at?: string | null;
 };
 
+type SignupPayload = {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  industry?: string;
+  plan?: string;
+};
+
 type AuthContextValue = {
   token: string | null;
   user: AuthUser | null;
@@ -26,7 +35,7 @@ type AuthContextValue = {
   loginWithGoogle: () => void;
   setSession: (token: string, user?: AuthUser | null) => Promise<void>;
   loginWithPassword: (payload: { email: string; password: string }) => Promise<AuthUser>;
-  signupWithPassword: (payload: { name: string; email: string; phone: string; password: string }) => Promise<AuthUser>;
+  signupWithPassword: (payload: SignupPayload) => Promise<AuthUser>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 };
@@ -41,6 +50,14 @@ async function fetchCurrentUser(token: string) {
   });
 
   return response.data.data;
+}
+
+function extractSession(payload: any) {
+  const data = payload?.data && typeof payload.data === "object" ? payload.data : payload;
+  return {
+    token: data?.token || payload?.token || null,
+    user: data?.user || payload?.user || null
+  };
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -105,28 +122,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (payload: { email: string; password: string }) => {
       const response = await clientApi.post<{
         success: boolean;
-        data: {
-          token: string;
-          user: AuthUser;
+        data?: {
+          token?: string;
+          user?: AuthUser;
         };
       }>("/auth/login", payload);
 
-      await setSession(response.data.data.token, response.data.data.user);
-      return response.data.data.user;
+      const session = extractSession(response.data);
+
+      if (!session.token) {
+        throw new Error("Missing authentication token.");
+      }
+
+      await setSession(session.token, session.user || undefined);
+      return session.user || fetchCurrentUser(session.token);
     },
     [setSession]
   );
 
   const signupWithPassword = useCallback(
-    async (payload: { name: string; email: string; phone: string; password: string }) => {
-      await clientApi.post("/auth/signup", payload);
+    async (payload: SignupPayload) => {
+      const response = await clientApi.post<{
+        success: boolean;
+        data?: {
+          token?: string;
+          user?: AuthUser;
+        };
+      }>("/auth/signup", payload);
+
+      const session = extractSession(response.data);
+
+      if (session.token) {
+        await setSession(session.token, session.user || undefined);
+        return session.user || fetchCurrentUser(session.token);
+      }
 
       return loginWithPassword({
         email: payload.email,
         password: payload.password
       });
     },
-    [loginWithPassword]
+    [loginWithPassword, setSession]
   );
 
   const value = useMemo<AuthContextValue>(
@@ -136,7 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       isAuthenticated: Boolean(token && user),
       loginWithGoogle() {
-        window.location.href = `${BACKEND_URL}/auth/google`;
+        window.location.href = `${BACKEND_URL || ""}/auth/google`;
       },
       setSession,
       loginWithPassword,

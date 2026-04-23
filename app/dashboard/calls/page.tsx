@@ -30,12 +30,12 @@ export default function DashboardCallsPage() {
 
     setLoading(true);
     clientApi
-      .get<{ success: boolean; data: { calls: CallRecord[] } }>("/calls?limit=50", {
+      .get<{ success: boolean; data: CallRecord[] }>("/calls?limit=50", {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then((response) => {
-        setCalls(response.data.data.calls || []);
-        setSelected(response.data.data.calls?.[0] || null);
+        setCalls(response.data.data || []);
+        setSelected(response.data.data?.[0] || null);
       })
       .catch((fetchError) => {
         setError(fetchError?.response?.data?.error || "Unable to load calls.");

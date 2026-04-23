@@ -80,7 +80,7 @@ export function AppShell({
       <div className="sticky top-0 z-[120] h-0 overflow-visible">
         <div
           ref={headerRef}
-          className="w-full border-b border-[rgba(45,37,96,0.25)] bg-[#0D0D1A]/95 shadow-[0_12px_32px_rgba(7,5,18,0.22)] backdrop-blur-xl"
+          className="w-full border-b border-[var(--border-base)] bg-[rgba(8,7,15,0.85)] shadow-[0_12px_32px_rgba(7,5,18,0.22)] backdrop-blur-[12px]"
         >
           <AnnouncementBar />
           <Navbar locale={locale} />

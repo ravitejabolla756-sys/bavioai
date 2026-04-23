@@ -42,7 +42,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
         className={cn(
-          "surface surface-hover relative overflow-hidden rounded-[12px] p-6 will-change-transform",
+          "surface surface-hover relative overflow-hidden rounded-[16px] p-6 will-change-transform",
           accent && "before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary before:content-['']",
           className
         )}

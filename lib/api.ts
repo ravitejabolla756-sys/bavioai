@@ -6,9 +6,9 @@ function normalizeBaseUrl(url?: string | null) {
 
 export function getBackendUrl() {
   const configuredUrl = normalizeBaseUrl(
+    process.env.NEXT_PUBLIC_API_URL ||
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     process.env.BAVIO_API_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.FRONTEND_URL
   );

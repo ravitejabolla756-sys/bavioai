@@ -39,7 +39,7 @@ export default function DocsQuickstartPage() {
         </div>
         <div className="container mt-8">
           <Button asChild size="lg">
-            <Link href="/sign-up">Start with Bavio</Link>
+            <Link href="/signup">Start with Bavio</Link>
           </Button>
         </div>
       </section>

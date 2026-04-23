@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Sora } from "next/font/google";
+import { DM_Sans, JetBrains_Mono, Syne } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -9,18 +9,18 @@ import { buildMetadata } from "@/lib/seo";
 
 import "./globals.css";
 
-const display = Sora({
+const display = Syne({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-display",
-  weight: ["600", "700", "800"]
+  weight: ["700", "800"]
 });
 
-const body = Inter({
+const body = DM_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-body",
-  weight: ["400", "500", "600", "700"]
+  weight: ["300", "400", "500"]
 });
 
 const mono = JetBrains_Mono({

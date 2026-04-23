@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import GoogleAuthButton from "@/components/shared/google-auth-button";
@@ -13,18 +13,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const plans = ["Starter", "Growth", "Scale"] as const;
+const industries = ["Real Estate", "Healthcare", "EdTech", "Restaurants", "Services", "E-Commerce", "Other"] as const;
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signupWithPassword } = useAuth();
   const [businessName, setBusinessName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [industry, setIndustry] = useState<(typeof industries)[number]>("Real Estate");
   const [selectedPlan, setSelectedPlan] = useState<(typeof plans)[number]>("Growth");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const plan = searchParams.get("plan");
+    if (!plan) return;
+
+    const matchedPlan = plans.find((entry) => entry.toLowerCase() === plan.toLowerCase());
+    if (matchedPlan) {
+      setSelectedPlan(matchedPlan);
+    }
+  }, [searchParams]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,7 +49,9 @@ export function SignupForm() {
         name: businessName,
         email,
         phone,
-        password
+        password,
+        industry,
+        plan: selectedPlan.toLowerCase()
       });
       window.localStorage.setItem("bavio_plan_preference", selectedPlan.toLowerCase());
       router.push("/dashboard");
@@ -94,6 +109,24 @@ export function SignupForm() {
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="signup-industry" className="text-secondary">
+          Industry
+        </Label>
+        <select
+          id="signup-industry"
+          value={industry}
+          onChange={(event) => setIndustry(event.target.value as (typeof industries)[number])}
+          className="flex h-11 w-full rounded-[12px] border border-[var(--border-base)] bg-[var(--bg-base)] px-4 text-[14px] text-[var(--text-primary)] transition-all duration-200 focus:border-[var(--brand)] focus:outline-none focus:shadow-[0_0_0_3px_rgba(124,58,237,0.18)]"
+        >
+          {industries.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="signup-password" className="text-secondary">
           Password
         </Label>
@@ -120,7 +153,7 @@ export function SignupForm() {
       </div>
 
       <div className="space-y-3">
-        <Label className="text-secondary">Plan</Label>
+        <Label className="text-secondary">Selected plan</Label>
         <div className="grid grid-cols-3 gap-2">
           {plans.map((plan) => {
             const active = selectedPlan === plan;
