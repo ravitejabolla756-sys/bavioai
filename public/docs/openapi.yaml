@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: Bavio API
+  version: 1.0.0
+servers:
+  - url: https://api.bavio.ai/v1
+paths:
+  /agents:
+    post:
+      summary: Create agent
+      responses:
+        "201":
+          description: Created
+  /calls:
+    post:
+      summary: Create call
+      responses:
+        "201":
+          description: Queued
+  /calls/{id}:
+    get:
+      summary: Get call
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Call details
