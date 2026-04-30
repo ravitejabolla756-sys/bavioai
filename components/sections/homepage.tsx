@@ -8,9 +8,9 @@ import { LiveDemoModal } from "@/components/home/live-demo-modal";
 import { SectionReveal } from "@/components/shared/section-reveal";
 import { CustomerLogosBar, PressMentions, TestimonialQuotes } from "@/components/shared/trust-elements";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { formatNumber } from "@/lib/utils";
+import { cn, formatNumber } from "@/lib/utils";
 
 const trustStats = [
   ["<500ms", "Latency"],
@@ -314,34 +314,50 @@ export function Homepage() {
             <span className="eyebrow">Pricing preview</span>
             <h2 className="section-title">Simple pricing with clear upgrade paths.</h2>
           </SectionReveal>
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
+          <div className="mt-12 grid items-stretch gap-6 lg:grid-cols-3">
             {pricingPlans.map((plan) => (
-              <Card key={plan.name} className={`relative p-7 ${plan.featured ? "border-[var(--brand)]" : ""}`}>
+              <div key={plan.name} className="relative h-full pt-4">
                 {plan.featured ? (
-                  <div className="absolute left-6 top-0 -translate-y-1/2 rounded-full bg-[var(--brand)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white">
+                  <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2 rounded-full bg-[var(--brand)] px-5 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white shadow-[0_12px_28px_rgba(255,107,0,0.28)]">
                     Most Popular
                   </div>
                 ) : null}
-                <p className="text-sm uppercase tracking-[0.16em] text-[var(--text-secondary)]">{plan.name}</p>
-                <div className="mt-4 flex items-end gap-2">
-                  <span className="text-4xl font-heading font-[800] tracking-[-0.05em] text-white">INR {formatNumber(plan.price)}</span>
-                  <span className="mb-1 text-sm text-[var(--text-secondary)]">/mo</span>
-                </div>
-                <div className="mt-5 space-y-3">
-                  {plan.features.map((feature) => (
-                    <div key={feature} className="flex items-center gap-3 text-sm text-[var(--text-primary)]">
-                      <Check className="h-4 w-4 text-[var(--accent-green)]" />
-                      {feature}
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-5 rounded-[10px] border border-[var(--border-base)] bg-[var(--bg-overlay)] px-3 py-2 text-xs text-[var(--text-secondary)]">
-                  Cancel anytime, no questions asked.
-                </p>
-                <Button asChild className="mt-6 w-full" variant={plan.featured ? "default" : "ghost"}>
-                  <Link href={plan.href}>Choose {plan.name}</Link>
-                </Button>
-              </Card>
+                <Card
+                  tilt={false}
+                  className={`flex h-full min-h-[380px] flex-col rounded-[16px] p-8 shadow-[0_28px_70px_rgba(0,0,0,0.28)] ${
+                    plan.featured
+                      ? "border-[var(--brand)] bg-[linear-gradient(180deg,rgba(255,107,0,0.08),rgba(255,255,255,0.02)),var(--card-bg)]"
+                      : "border-[var(--border-base)]"
+                  }`}
+                >
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--text-secondary)]">{plan.name}</p>
+                  <div className="mt-5 flex flex-wrap items-end gap-x-2 gap-y-1">
+                    <span className="font-heading text-[clamp(34px,4vw,48px)] font-[800] leading-none text-white">
+                      INR {formatNumber(plan.price)}
+                    </span>
+                    <span className="pb-1 text-sm text-[var(--text-secondary)]">/mo</span>
+                  </div>
+                  <div className="mt-6 space-y-4">
+                    {plan.features.map((feature) => (
+                      <div key={feature} className="flex items-center gap-3 text-[15px] font-semibold text-[var(--text-primary)]">
+                        <Check className="h-4 w-4 shrink-0 text-[var(--accent-green)]" />
+                        <span>{feature}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-auto pt-7">
+                    <p className="rounded-[10px] border border-[var(--border-base)] bg-[var(--bg-overlay)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+                      Cancel anytime, no questions asked.
+                    </p>
+                    <Link
+                      href={plan.href}
+                      className={cn(buttonVariants({ variant: plan.featured ? "default" : "ghost" }), "mt-5 w-full")}
+                    >
+                      Choose {plan.name}
+                    </Link>
+                  </div>
+                </Card>
+              </div>
             ))}
           </div>
           <div className="mt-8 text-center">
@@ -351,6 +367,7 @@ export function Homepage() {
           </div>
         </div>
       </section>
+
     </div>
   );
 }
