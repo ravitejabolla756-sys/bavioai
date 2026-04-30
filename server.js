@@ -85,10 +85,20 @@ const realtimeGateway = createRealtimeGateway({ server });
 const serverReady = (async () => {
     try {
         await nextApp.prepare();
+    } catch (error) {
+        console.error('[STARTUP] Next.js initialization failed:', error.message);
+        process.exit(1);
+    }
+
+    try {
         await testConnection();
     } catch (error) {
-        console.error('[STARTUP] Initialization failed:', error.message);
-        process.exit(1);
+        if (dev) {
+            console.warn('[DB] Startup validation failed in development. Continuing without a live DB connection.');
+        } else {
+            console.error('[STARTUP] Database initialization failed:', error.message);
+            process.exit(1);
+        }
     }
 
     try {

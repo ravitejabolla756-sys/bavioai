@@ -2,11 +2,11 @@ import { formatCurrency, slugify } from "@/lib/utils";
 
 export const BRAND = {
   name: "Bavio AI",
-  domain: "bavio.in",
+  domain: "bavio.ai",
   tagline: "Autonomous Voice Agents for Business Calls",
   description:
     "Deploy enterprise-grade voice agents that answer, qualify, schedule, and automate business calls in Hindi, Tamil, Telugu, Marathi, Kannada, Bengali, and English.",
-  supportEmail: "hello@bavio.in",
+  supportEmail: "hello@bavio.ai",
   whatsappUrl: "https://wa.me/919999999999?text=Hi%20Bavio%20AI%2C%20I%20want%20a%20demo.",
   location: "Bangalore, India",
   languages: ["Hindi", "Tamil", "Telugu", "Kannada", "Marathi", "Bengali", "English"]
@@ -582,7 +582,7 @@ call = client.calls.create(
 )
 
 print(call["id"], call["status"])`,
-  curl: `curl -X POST https://api.bavio.in/v1/calls \\
+  curl: `curl -X POST https://api.bavio.ai/v1/calls \\
   -H "Authorization: Bearer $BAVIO_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -663,80 +663,131 @@ export const OPEN_ROLES = [
 
 export const BLOG_POSTS = [
   {
-    slug: "why-indian-businesses-need-ai-voice-agents-in-2026",
-    title: "Why Indian Businesses Need AI Voice Agents in 2026",
-    category: "Strategy",
-    readTime: "8 min read",
+    slug: "what-is-a-voice-ai-agent",
+    title: "What Is a Voice AI Agent? A Practical Guide for 2026",
+    category: "Industry Insights",
+    readTime: "7 min read",
     author: "Nandini Sharma",
     image: "/images/blog-voice-agents.svg",
     summary:
-      "The Indian customer expects instant answers in their language. Voice AI is quickly becoming the operating system for that expectation.",
+      "A voice AI agent is no longer just an IVR replacement. It is a real-time operations layer for calls.",
     body: [
-      "Indian businesses entered 2026 with a familiar problem and a new level of urgency: customer demand keeps climbing, but human calling operations remain expensive, inconsistent, and hard to scale. Every missed lead callback, unanswered clinic inquiry, and delayed delivery update compounds into revenue leakage. For companies that still depend on phone conversations to close sales or resolve service requests, the cost of operating with yesterday's call infrastructure is now uncomfortably visible.",
-      "What changed is not just the volume of calls. Customer expectations themselves shifted. Consumers now expect businesses to pick up instantly, understand mixed-language speech, respond naturally, and follow through on the next action without asking them to repeat context. They compare every phone interaction with the speed and convenience they already experience in messaging apps, digital payments, and instant support channels. That means the bar for a good enough phone experience is much higher than it was even two years ago.",
-      "This is precisely where AI voice agents matter. They are not just automated IVRs with better branding. A modern voice agent can identify intent, extract relevant details, check a calendar or CRM, send a WhatsApp follow-up, and escalate only when a human is truly needed. For Indian businesses, the breakthrough is even more meaningful because the best systems now handle multilingual conversations with sub-second responsiveness. The difference between automation that feels robotic and automation that feels genuinely helpful is what determines customer trust.",
-      "The India-specific opportunity is enormous. A business serving Bengaluru, Hyderabad, Pune, and Jaipur cannot assume every customer wants to speak only English. In many categories, from healthcare and lending to restaurants and education, the most valuable customer interactions happen in Hindi or a regional language, often with code-switching inside the same call. Teams that force customers into rigid language experiences lose conversion. Teams that adapt naturally gain it. Voice AI finally makes that adaptation operationally feasible at scale.",
-      "There is also a cost story, but the conversation should be framed correctly. AI voice agents are not useful merely because they are cheaper than human agents. They matter because they allow human teams to focus on the calls where judgment, empathy, or exception handling creates the most value. When repetitive qualification, scheduling, reminders, and status updates are automated, teams stop drowning in low-leverage work. In practice, this often means higher productivity, lower staffing pressure, and better customer satisfaction at the same time.",
-      "The businesses benefiting most are the ones treating voice as part of a broader workflow system. A call should not end with a recording buried in a dashboard. It should end with a booked appointment, a CRM update, a payment link, a site visit schedule, or a resolved support ticket. The real ROI comes from combining voice with structured action. That is why the best AI voice deployments are deeply integrated with telephony, messaging, calendars, and customer data systems from day one.",
-      "India's infrastructure stack has matured enough to support this shift. Telephony providers like Exotel, messaging ecosystems like WhatsApp Business, and local-first payment rails have created a foundation that AI systems can plug into cleanly. The result is not experimental automation for innovation decks. It is practical automation for revenue, operations, and customer experience leaders who need measurable outcomes each week.",
-      "In 2026, AI voice is no longer a futuristic bet for Indian businesses. It is becoming a competitive requirement. The companies that adopt early will not just cut cost; they will build a faster, more responsive operating model that customers notice immediately. The companies that wait will still be dealing with the same missed calls, fragmented workflows, and overworked telecalling teams, only in a market where customers have already moved on."
+      "A voice AI agent is an automated system that can hold real phone conversations, understand caller intent, and execute business workflows during or after the call. Unlike traditional IVR flows, modern voice agents are context-aware and can adapt to natural conversation patterns.",
+      "In production use, a voice agent typically performs five jobs: answer every inbound call, identify the caller's intent, capture key details, trigger workflow actions, and route only high-complexity cases to humans. This is why teams see both service quality and operational efficiency improve at the same time.",
+      "The core architecture usually combines telephony, speech recognition, language reasoning, and speech synthesis. Where teams unlock real value is by connecting that loop to CRM systems, calendars, ticketing tools, and messaging channels so outcomes are logged automatically.",
+      "In 2026, voice AI is becoming a standard layer for businesses with high inbound demand. Companies using voice agents well are not replacing human teams entirely. They are moving humans to higher-value conversations while automation handles repetitive high-volume call patterns."
     ]
   },
   {
-    slug: "how-we-built-sub-500ms-voice-ai-on-exotel",
-    title: "How We Built Sub-500ms Voice AI on Exotel",
-    category: "Engineering",
+    slug: "voice-ai-agent-for-business",
+    title: "Voice AI Agent for Business: What to Automate First",
+    category: "Industry Insights",
+    readTime: "8 min read",
+    author: "Aarav Kulkarni",
+    image: "/images/blog-voice-agents.svg",
+    summary:
+      "A practical guide to using a voice AI agent for business calls, lead capture, scheduling, support, and follow-up workflows.",
+    body: [
+      "A voice AI agent for business should start with calls that are frequent, measurable, and easy to escalate. The best first workflows are missed-call capture, appointment booking, lead qualification, and basic support triage.",
+      "The goal is not to automate every conversation on day one. It is to protect the moments where delay creates lost revenue: a buyer calling after hours, a patient trying to book a slot, or a customer asking for a simple status update.",
+      "A strong pilot includes a clear script, a defined escalation policy, CRM or calendar integration, and outcome reporting. These pieces make the agent useful to the operations team, not just impressive in a demo.",
+      "Once the first workflow is stable, teams usually expand into outbound reminders, payment nudges, and campaign follow-up. That is where a voice AI agent becomes a repeatable business operating layer."
+    ]
+  },
+  {
+    slug: "automate-phone-calls-ai",
+    title: "How to Automate Phone Calls with AI",
+    category: "Developer Guides",
+    readTime: "7 min read",
+    author: "Nandini Sharma",
+    image: "/images/blog-exotel.svg",
+    summary:
+      "Learn how to automate phone calls with AI using telephony, speech recognition, workflow logic, and human handoff rules.",
+    body: [
+      "To automate phone calls with AI, start by choosing one high-volume call flow: booking, lead qualification, reminders, or support triage. Clear scope keeps the first deployment measurable.",
+      "The technical stack usually includes telephony, speech-to-text, reasoning, text-to-speech, and workflow execution. The business stack includes CRM records, calendars, ticketing tools, and messaging channels.",
+      "Good call automation depends on guardrails. Define when the AI should ask a clarifying question, when it should complete a workflow, and when it should route the caller to a human.",
+      "After launch, monitor call completion, escalation rate, response latency, and conversion outcomes. These metrics reveal whether the AI is reducing work and improving customer experience."
+    ]
+  },
+  {
+    slug: "reduce-missed-calls-ai",
+    title: "How to Reduce Missed Calls with AI",
+    category: "Case Studies",
     readTime: "6 min read",
+    author: "Rohit Varma",
+    image: "/images/blog-roi.svg",
+    summary:
+      "Reduce missed calls with AI by answering instantly, qualifying callers, logging outcomes, and sending follow-up messages.",
+    body: [
+      "Missed calls are often hidden revenue leakage. A caller who cannot reach your team may choose a competitor, abandon a booking, or delay a purchase decision.",
+      "AI reduces missed calls by answering immediately, asking the right qualification questions, and capturing structured details even when staff are unavailable.",
+      "The best missed-call workflows do more than record a voicemail. They create a lead, send a confirmation, notify the right team, and schedule a callback or appointment when needed.",
+      "To measure impact, track missed-call percentage, callback completion rate, booking conversion, and revenue recovered from after-hours or peak-hour callers."
+    ]
+  },
+  {
+    slug: "bavio-vs-vapi-vs-retell",
+    title: "How Bavio Compares to Vapi and Retell",
+    category: "Developer Guides",
+    readTime: "9 min read",
     author: "Aarav Kulkarni",
     image: "/images/blog-exotel.svg",
     summary:
-      "Low-latency voice AI in India requires orchestration discipline more than model hype. Here is the stack that got us there.",
+      "A practical comparison of architecture, deployment model, integrations, and enterprise readiness across three leading voice stacks.",
     body: [
-      "When we started measuring end-to-end call latency in production-like conditions, it became obvious that the challenge was not a single slow model. It was the accumulation of small delays across telephony, streaming transport, speech recognition, reasoning, speech synthesis, and workflow execution. If you want voice AI to feel interruptible and natural, every stage of that loop has to be treated like a real-time system rather than a typical SaaS request chain.",
-      "Our design goal was simple: stay under 500 milliseconds from speaker turn completion to audio response in the median case. Exotel mattered because it gave us an India-first telephony layer that fits real customer deployments. But telephony alone does not solve the problem. We had to tune stream buffering, normalize audio frames aggressively, and reduce downstream jitter so that the rest of the pipeline even had a chance to perform.",
-      "The architecture we settled on uses a streaming speech-to-text layer that emits partial hypotheses continuously, not just final transcripts. That lets the language layer begin planning before the caller is fully done speaking. Combined with end-of-turn detection tuned for Indian conversational pacing, we can shorten the silence customers feel between their sentence and the agent's reply. This is one of the biggest contributors to perceived responsiveness.",
-      "The language layer itself is optimized for task completion rather than open-ended chat. For business calls, the model almost always needs to classify intent, fetch data, confirm a detail, or trigger an action. We structure prompts and tool calls around those jobs so the model does less wandering and more decisive execution. The fewer tokens it has to think through, the faster and more reliable the experience becomes.",
-      "Text-to-speech also required careful tuning. Good voice quality is not enough if synthesis comes too late or clips under interruption. We stream audio as soon as stable chunks are ready, and we preserve the ability to stop playback instantly when the caller interjects. That creates the sensation of a live conversation instead of a voicemail sequence of precomputed responses.",
-      "Exotel integration enters again at the workflow layer. We treat telephony events, call state, and post-call actions as first-class data. That means our assistant can answer, continue, transfer, and close the loop without a brittle glue layer between telephony and application logic. When a clinic booking is made or a payment link is requested, the workflow is executed in the same real-time context rather than deferred to a batch processor.",
-      "The final lesson is operational: low latency is a systems problem. You cannot reason about it from one dashboard. We measure stage timings independently, watch degradation per provider, and optimize the long tail rather than only the average. That discipline is what turned a promising demo into a production stack that feels fast enough for real business conversations."
+      "When teams evaluate voice AI vendors, they usually compare speed of launch, control over workflows, integration depth, and long-term reliability. Bavio, Vapi, and Retell all support fast prototyping, but their strengths differ depending on operational goals.",
+      "Vapi is often chosen for quick developer iteration with flexible APIs. Retell is strong for teams focused on programmable call behavior and telephony orchestration. Bavio is optimized for end-to-end operational deployments where voice calls must connect to business actions, compliance controls, and multi-team governance.",
+      "A useful evaluation framework is: how quickly can we launch, how safely can we scale, and how cleanly can we connect existing systems? For many teams, the answer depends less on model performance and more on workflow quality, observability, and enterprise controls.",
+      "The best choice is the platform that matches your target operating model, not just demo quality. Pilot with a real use case, track conversion and escalation outcomes, then choose based on measurable production performance."
     ]
   },
   {
-    slug: "hindi-ai-voice-agents-the-future-of-customer-service-in-india",
-    title: "Hindi AI Voice Agents: The Future of Customer Service in India",
-    category: "Customer Experience",
-    readTime: "7 min read",
+    slug: "top-5-use-cases-for-ai-voice-agents-in-2026",
+    title: "Top 5 Use Cases for AI Voice Agents in 2026",
+    category: "AI Trends",
+    readTime: "6 min read",
     author: "Rohit Varma",
     image: "/images/blog-hindi.svg",
     summary:
-      "Hindi support is not an add-on. For many businesses, it is the difference between automation that converts and automation that fails.",
+      "The highest-ROI use cases in 2026 are predictable, high-volume call workflows with clear business outcomes.",
     body: [
-      "Customer service in India is often discussed as a scale problem, but it is equally a language problem. The phone remains the most natural support channel for millions of people, yet many automated systems still assume English-only interactions or force callers into brittle menu trees. That gap creates friction at the exact moment when a customer wants clarity, reassurance, and speed.",
-      "Hindi AI voice agents change that equation because they meet customers where they already are. A caller should be able to say, in a natural tone, that a medicine order is delayed, a site visit needs rescheduling, or a loan reminder needs clarification, and the system should understand the request without forcing unnatural phrasing. That kind of experience feels respectful, and respect is a powerful driver of trust.",
-      "The real challenge is not simple translation. In live conversations, customers switch between Hindi and English constantly. They use local phrasing, shorten words, and speak over the assistant when the issue is urgent. An effective Hindi voice agent therefore needs to do more than read translated scripts. It must handle code-switching, accent variation, and the rhythm of real spoken requests in India.",
-      "Why does this matter commercially? Because conversion improves when comprehension improves. In healthcare, patients are more likely to complete booking flows when the assistant explains slots and instructions in a familiar language. In lending, reminder calls land more effectively when the message feels clear instead of formal and distant. In D2C commerce, COD confirmations are smoother when the customer feels immediately understood.",
-      "There is also an inclusion argument. Businesses that automate only for English-speaking customers unintentionally create a two-tier service model. Their fastest, most scalable support flow works well for one segment and poorly for another. AI voice agents that work in Hindi help correct that imbalance. They allow businesses to scale service quality without selecting customers by language comfort.",
-      "Internally, Hindi voice support helps teams as well. Managers can standardize scripts, monitor outcomes, and improve flows without relying entirely on large manual calling teams. Frontline agents still play an important role, especially for sensitive or complex cases, but they spend more time where empathy and judgment truly matter. The repetitive calls are handled consistently, every single time.",
-      "As more Indian businesses compete on responsiveness, Hindi AI voice will stop being a differentiator and become table stakes. The companies that invest now will gain both operational leverage and customer goodwill. The ones that wait will continue spending on telecalling volume while delivering a less accessible experience than they realize."
+      "The strongest use cases for voice AI share common traits: repetitive call patterns, measurable conversion events, and clear escalation rules. Teams with these workflows usually get ROI fastest.",
+      "Top use case #1 is appointment and reservation booking. #2 is inbound lead qualification. #3 is support triage and ticket creation. #4 is payment reminders and collections support. #5 is dispatch and field-service scheduling.",
+      "These workflows generate value because they are frequent and operationally costly when handled manually. Automating them reduces missed calls, improves response time, and increases consistency across teams.",
+      "In 2026, winning teams start with one high-volume use case, measure outcomes weekly, and then expand automation gradually across adjacent workflows."
     ]
   },
   {
-    slug: "roi-of-ai-voice-agents-vs-human-agents-for-d2c-brands",
-    title: "ROI of AI Voice Agents vs Human Agents for D2C Brands",
-    category: "Finance",
-    readTime: "6 min read",
+    slug: "how-healthcare-can-automate-patient-calls",
+    title: "How Healthcare Teams Can Automate Patient Calls",
+    category: "Case Studies",
+    readTime: "8 min read",
+    author: "Nandini Sharma",
+    image: "/images/blog-hindi.svg",
+    summary:
+      "Patient-facing phone workflows are ideal for voice automation when built with escalation and compliance guardrails.",
+    body: [
+      "Healthcare teams manage high call volume around booking, follow-ups, reminders, and basic support. During peak hours, this can overwhelm front-desk staff and create avoidable delays in patient response.",
+      "Voice AI can automate first-contact workflows: verify details, suggest appointment slots, send confirmations, and escalate sensitive cases to human operators. This reduces missed calls while keeping service quality consistent.",
+      "For healthcare deployments, the critical design principle is safety: clear disclosures, escalation rules for clinical-risk intents, and secure data handling. Automation should support care teams, not replace high-judgment decision paths.",
+      "Teams that succeed in healthcare automation usually begin with appointment workflows, measure no-show reduction and booking conversion, then expand into reminder and follow-up programs."
+    ]
+  },
+  {
+    slug: "roi-of-voice-ai-for-small-businesses",
+    title: "The ROI of Voice AI for Small Businesses",
+    category: "Product Updates",
+    readTime: "7 min read",
     author: "Nandini Sharma",
     image: "/images/blog-roi.svg",
     summary:
-      "The strongest ROI case for D2C voice AI is not replacing people blindly. It is reallocating people to higher-value moments.",
+      "For small businesses, voice AI ROI comes from faster response, fewer missed leads, and cleaner follow-up execution.",
     body: [
-      "D2C brands in India often discover the same painful math once order volume rises. The brand needs more customer conversations to confirm COD orders, answer delivery questions, recover failed payments, and handle returns. But scaling a human call center for those needs is expensive, inconsistent, and hard to forecast. Hiring more agents adds cost linearly while training, quality, and attrition create more operational drag behind the scenes.",
-      "AI voice agents offer a different cost curve. A single well-configured agent can handle the repetitive parts of the queue across every hour of the day, with the same script discipline and workflow accuracy on call one and call one thousand. That does not eliminate the need for human support, but it changes where human effort goes. Instead of spending mornings confirming routine COD orders, your best people can focus on escalations, retention, and upsell opportunities.",
-      "The cost comparison is usually where teams begin. A human telecaller may cost roughly ₹25,000 per month once salary, supervision, tooling, and shrinkage are included. A production-grade AI voice plan might begin around ₹4,999 per month before usage overages. Even after you add telephony and workflow costs, the monthly savings can be material. But treating that savings as the whole ROI case understates the impact.",
-      "The hidden ROI shows up in response time and consistency. An AI agent can call a new lead or COD customer immediately, not when a shift opens or a queue frees up. It can follow the exact same compliance wording every time. It can log every outcome into your systems automatically. Those advantages increase delivery success, reduce cancellations, and shorten operational loops in ways that a salary comparison alone cannot capture.",
-      "There is also a revenue protection angle. Every delayed COD confirmation risks a cancelled order. Every missed support call raises the chance of a return or a negative review. Every unlogged customer issue weakens your retention playbook. When an AI voice system reduces those failure points, it pays back through saved revenue, not just saved payroll.",
-      "Of course, ROI depends on deployment quality. A poor workflow that misroutes customers or sounds robotic can create more churn than it saves. That is why D2C teams should evaluate voice AI as an operational system, not a novelty. It needs live order data, payment workflows, language support, exception routing, and quality monitoring. When those pieces are present, the financial case becomes much stronger and much more defensible.",
-      "The best brands use AI voice agents to reshape the support stack, not simply shrink headcount. They keep human agents for moments requiring empathy or flexible judgment. They automate the repetitive, time-sensitive conversations that otherwise bloat cost and slow down service. For D2C brands operating on tight margins, that combination of lower operating cost and higher service consistency is where ROI becomes undeniable."
+      "Small businesses lose revenue when calls are missed during peak hours or after closing time. Voice AI addresses this directly by answering every call and capturing intent before opportunities disappear.",
+      "Cost savings matter, but revenue recovery often matters more. If automation increases booking completion, qualified lead capture, or payment follow-up success, returns can compound quickly.",
+      "A simple ROI model tracks: missed call percentage, average value per successful call, and conversion lift after deployment. Most teams can estimate impact within the first month of production use.",
+      "The highest-performing SMB deployments combine call handling with workflow actions such as CRM updates, calendar booking, and WhatsApp follow-ups. That is where automation shifts from convenience to growth infrastructure."
     ]
   }
 ];
@@ -749,7 +800,7 @@ export const PRIVACY_SECTIONS = [
   {
     title: "1. Scope",
     paragraphs: [
-      "This Privacy Policy explains how Bavio AI Inc. and its affiliates collect, use, disclose, and protect personal data when you visit bavio.in, create an account, request a demo, integrate your systems, or use the Bavio AI platform and related services.",
+      "This Privacy Policy explains how Bavio AI Inc. and its affiliates collect, use, disclose, and protect personal data when you visit bavio.ai, create an account, request a demo, integrate your systems, or use the Bavio AI platform and related services.",
       "It is designed to align with globally recognized privacy standards, including the GDPR principles of transparency, purpose limitation, and data minimization, as well as the Indian Information Technology Act, 2000 and related rules concerning reasonable security practices and sensitive personal data."
     ]
   },
@@ -826,7 +877,7 @@ export const PRIVACY_SECTIONS = [
   {
     title: "12. Contact",
     paragraphs: [
-      "For privacy questions, security concerns, or data subject requests, contact hello@bavio.in. If we make material changes to this Privacy Policy, we will update the effective date and provide notice where required."
+      "For privacy questions, security concerns, or data subject requests, contact hello@bavio.ai. If we make material changes to this Privacy Policy, we will update the effective date and provide notice where required."
     ]
   }
 ];
@@ -913,7 +964,7 @@ export const TERMS_SECTIONS = [
     title: "12. Governing Law",
     paragraphs: [
       "These Terms are governed by the laws of India, without regard to conflict-of-law principles. Courts located in Bengaluru, Karnataka will have exclusive jurisdiction over disputes arising from or related to these Terms, unless an executed agreement with your organization provides otherwise.",
-      "Questions about these Terms may be sent to hello@bavio.in."
+      "Questions about these Terms may be sent to hello@bavio.ai."
     ]
   }
 ];

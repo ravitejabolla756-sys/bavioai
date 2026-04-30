@@ -19,12 +19,11 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         onMouseMove?.(event);
         return;
       }
-
       const bounds = localRef.current.getBoundingClientRect();
       const x = event.clientX - bounds.left;
       const y = event.clientY - bounds.top;
       const rotateY = ((x / bounds.width) * 2 - 1) * -4;
-      const rotateX = (((y / bounds.height) * 2 - 1) * 4);
+      const rotateX = ((y / bounds.height) * 2 - 1) * 4;
       localRef.current.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
       onMouseMove?.(event);
     }
@@ -42,7 +41,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
         className={cn(
-          "surface surface-hover relative overflow-hidden rounded-[16px] p-6 will-change-transform",
+          "surface surface-hover relative overflow-hidden rounded-[12px] border border-border bg-card/90 p-6 backdrop-blur-md will-change-transform",
           accent && "before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary before:content-['']",
           className
         )}
@@ -59,12 +58,7 @@ export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDiv
 }
 
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return (
-    <h3
-      className={cn("font-heading text-[20px] font-bold tracking-[-0.02em] text-foreground", className)}
-      {...props}
-    />
-  );
+  return <h3 className={cn("font-heading text-[20px] font-bold tracking-[-0.02em] text-foreground", className)} {...props} />;
 }
 
 export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {

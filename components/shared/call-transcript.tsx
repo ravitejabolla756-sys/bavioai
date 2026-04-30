@@ -37,7 +37,7 @@ export function CallTranscript({
           >
             <div
               className={cn(
-                "max-w-[92%] rounded-[10px] border bg-[#111111] px-4 py-3 text-[14px] leading-6 transition-all duration-500",
+                "max-w-[92%] rounded-[10px] border bg-[#111111] px-4 py-3 text-[14px] leading-6 transition-all duration-200",
                 visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
                 isRight
                   ? "border-border text-[#A1A1AA]"

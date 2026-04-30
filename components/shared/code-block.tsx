@@ -21,6 +21,7 @@ export function CodeBlock({
 }) {
   const [copied, setCopied] = useState(false);
   const { pushToast } = useToast();
+  const lines = code.split("\n");
 
   async function onCopy() {
     await navigator.clipboard.writeText(code);
@@ -47,7 +48,19 @@ export function CodeBlock({
         </button>
       </div>
       <pre className="overflow-x-auto p-5 leading-7 text-[var(--text-primary)]">
-        <code dangerouslySetInnerHTML={{ __html: highlightCode(code) }} />
+        <code>
+          {lines.map((line, index) => (
+            <span
+              key={`${language}-${index}`}
+              className="block opacity-0"
+              style={{
+                animation: "codeLineReveal 220ms ease-out forwards",
+                animationDelay: `${Math.min(index * 35, 280)}ms`
+              }}
+              dangerouslySetInnerHTML={{ __html: highlightCode(line || " ") }}
+            />
+          ))}
+        </code>
       </pre>
     </div>
   );

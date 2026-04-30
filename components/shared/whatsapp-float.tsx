@@ -9,8 +9,8 @@ export function WhatsAppFloat() {
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="fixed bottom-6 right-6 z-[115] inline-flex items-center gap-2 rounded-full bg-[#1da851] px-5 py-3 text-[14px] font-semibold text-white shadow-[0_8px_24px_rgba(29,168,81,0.15)] transition duration-300 hover:scale-[1.04] hover:shadow-[0_8px_32px_rgba(29,168,81,0.25)] max-md:bottom-20"
-      style={{ animation: "fadeUp 600ms var(--ease-spring) 1.6s both" }}
+      className="fixed bottom-6 right-6 z-[115] inline-flex items-center gap-2 rounded-full bg-[#1da851] px-5 py-3 text-[14px] font-semibold text-white shadow-[0_8px_24px_rgba(29,168,81,0.15)] transition duration-200 hover:scale-[1.04] hover:shadow-[0_8px_32px_rgba(29,168,81,0.25)] max-md:bottom-20"
+      style={{ animation: "fadeUp 280ms var(--ease-spring) 280ms both" }}
       aria-label="Chat on WhatsApp"
     >
       <svg viewBox="0 0 32 32" className="h-5 w-5 fill-current" aria-hidden="true">

@@ -22,7 +22,7 @@ export function VoiceWaveform({
     return () => window.clearInterval(interval);
   }, [bars]);
 
-  const palette = useMemo(() => ["#2563EB", "#4F46E5", "#7C3AED"], []);
+  const palette = useMemo(() => ["#2563EB", "#4F46E5", "#FF6B00"], []);
 
   return (
     <div className={cn("flex h-12 items-end gap-[3px]", className)}>
@@ -40,3 +40,4 @@ export function VoiceWaveform({
     </div>
   );
 }
+

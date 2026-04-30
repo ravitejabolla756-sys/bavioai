@@ -1,38 +1,32 @@
 import { Homepage } from "@/components/sections/homepage";
 import { PageTransition } from "@/components/shared/page-transition";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, getFaqJsonLd, getProductJsonLd } from "@/lib/seo";
 
 export const metadata = buildMetadata({
-  title: "Bavio AI | Never miss a business call. Ever.",
+  title: "Bavio AI | Clarity Over Complexity",
   description:
-    "Bavio AI answers every call in Hindi and English, captures lead details, books appointments, and sends WhatsApp alerts for Indian businesses.",
+    "Bavio AI is the end-to-end voice agent platform for global teams. Answer every call, automate workflows, and scale with enterprise-grade reliability.",
   path: "/"
 });
 
 export default function HomePage() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
+  const jsonLd = [
+    getProductJsonLd(),
+    getFaqJsonLd([
       {
-        "@type": "Organization",
-        name: "Bavio AI",
-        url: "https://www.bavio.in",
-        logo: "https://www.bavio.in/og-image.png",
-        sameAs: ["https://x.com/bavioai", "https://www.linkedin.com/company/bavio-ai"]
+        question: "Can Bavio support both Indian and global teams?",
+        answer: "Yes. Bavio supports local-language workflows and global deployments from one platform."
       },
       {
-        "@type": "Product",
-        name: "Bavio AI Voice Agent",
-        brand: "Bavio AI",
-        description: "AI voice assistant for Indian businesses that answers calls, captures leads, and automates follow-up.",
-        offers: {
-          "@type": "Offer",
-          priceCurrency: "INR",
-          price: "1999"
-        }
+        question: "Do you offer enterprise security and compliance support?",
+        answer: "Yes. Bavio provides security documentation, governance controls, and enterprise onboarding support."
+      },
+      {
+        question: "Is there a public status page and changelog?",
+        answer: "Yes. Bavio publishes both a status page and changelog for uptime transparency and release visibility."
       }
-    ]
-  };
+    ])
+  ];
 
   return (
     <PageTransition>

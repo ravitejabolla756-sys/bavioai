@@ -5,8 +5,8 @@
   "description": "Production-ready Bavio AI website and backend services",
   "main": "server.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development PORT=3000 FRONTEND_URL=http://localhost:3000 NEXT_PUBLIC_SITE_URL=http://localhost:3000 BAVIO_API_URL=http://localhost:3000 NEXT_PUBLIC_BACKEND_URL=http://localhost:3000 GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback node --watch server.js",
-    "dev:backend": "cross-env NODE_ENV=development PORT=3000 FRONTEND_URL=http://localhost:3000 NEXT_PUBLIC_SITE_URL=http://localhost:3000 BAVIO_API_URL=http://localhost:3000 NEXT_PUBLIC_BACKEND_URL=http://localhost:3000 GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback node --watch server.js",
+    "dev": "cross-env NODE_ENV=development PORT=3000 FRONTEND_URL=http://localhost:3000 NEXT_PUBLIC_SITE_URL=http://localhost:3000 BAVIO_API_URL=http://localhost:3000 NEXT_PUBLIC_BACKEND_URL=http://localhost:3000 GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback node server.js",
+    "dev:backend": "cross-env NODE_ENV=development PORT=3000 FRONTEND_URL=http://localhost:3000 NEXT_PUBLIC_SITE_URL=http://localhost:3000 BAVIO_API_URL=http://localhost:3000 NEXT_PUBLIC_BACKEND_URL=http://localhost:3000 GOOGLE_REDIRECT_URI=http://localhost:3000/auth/google/callback node server.js",
     "dev:full": "npm run dev",
     "build": "next build",
     "start": "cross-env NODE_ENV=production node server.js",

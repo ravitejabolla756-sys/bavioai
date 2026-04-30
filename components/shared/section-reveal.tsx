@@ -17,6 +17,7 @@ export function SectionReveal({
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(false);
+  const safeDelay = Math.min(delay, 280);
 
   useEffect(() => {
     const node = ref.current;
@@ -26,7 +27,7 @@ export function SectionReveal({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            window.setTimeout(() => setVisible(true), delay);
+            window.setTimeout(() => setVisible(true), safeDelay);
             observer.unobserve(entry.target);
           }
         });
@@ -36,14 +37,14 @@ export function SectionReveal({
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, [delay]);
+  }, [safeDelay]);
 
   return (
     <div
       id={id}
       ref={ref}
       className={cn("reveal", visible && "is-visible", className)}
-      style={{ transitionDelay: `${delay}ms` }}
+      style={{ transitionDelay: `${safeDelay}ms` }}
     >
       {children}
     </div>

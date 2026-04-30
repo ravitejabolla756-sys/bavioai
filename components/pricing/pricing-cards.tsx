@@ -9,22 +9,50 @@ import { formatCurrency } from "@/lib/utils";
 
 export function PricingCards({
   yearly = false,
-  compact = false
+  compact = false,
+  currency = "INR"
 }: {
   yearly?: boolean;
   compact?: boolean;
+  currency?: "INR" | "USD";
 }) {
+  const conversionRate = 83;
+  const customTier = {
+    name: "Custom",
+    slug: "custom",
+    monthly: 0,
+    yearly: 0,
+    description: "For very large enterprises needing custom infrastructure, procurement, and security reviews.",
+    features: [
+      "High-volume committed usage contracts",
+      "Dedicated deployment architecture",
+      "Custom compliance and legal terms",
+      "Priority TAM and implementation team"
+    ]
+  };
+
+  const tiers = [...PRICING_TIERS, customTier];
+
+  function formatPrice(value: number) {
+    if (currency === "USD") {
+      return `$${Math.round(value / conversionRate)}`;
+    }
+    return formatCurrency(value);
+  }
+
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      {PRICING_TIERS.map((tier) => {
-        const featured = tier.featured;
+    <div className="grid gap-6 lg:grid-cols-4">
+      {tiers.map((tier) => {
+        const featured = tier.name === "Professional";
         const price = yearly ? tier.yearly : tier.monthly;
         const signupHref =
           tier.name === "Starter"
             ? "/signup?plan=starter"
-            : tier.name === "Growth"
-              ? "/signup?plan=growth"
-              : "/signup?plan=scale";
+            : tier.name === "Professional"
+              ? "/signup?plan=professional"
+              : tier.name === "Enterprise"
+                ? "/signup?plan=enterprise"
+                : "/contact";
         return (
           <div key={tier.slug} className="relative pt-5">
             {featured ? (
@@ -41,8 +69,10 @@ export function PricingCards({
             >
               <div className="text-[13px] font-semibold uppercase tracking-[0.08em] text-secondary">{tier.name}</div>
               <div className="mt-5 flex items-end gap-2">
-                <span className="text-[56px] font-extrabold tracking-[-0.05em] text-white">{formatCurrency(price)}</span>
-                <span className="pb-2 text-[18px] text-muted">/mo</span>
+                <span className="text-[56px] font-extrabold tracking-[-0.05em] text-white">
+                  {tier.name === "Custom" ? "Custom" : formatPrice(price)}
+                </span>
+                {tier.name === "Custom" ? null : <span className="pb-2 text-[18px] text-muted">/mo</span>}
               </div>
               <p className="mt-3 text-[14px] text-muted">{tier.description}</p>
               <div className="my-6 h-px bg-border" />
@@ -61,7 +91,7 @@ export function PricingCards({
                 asChild
               >
                 <Link href={signupHref}>
-                  {tier.name === "Enterprise" ? "Talk to sales" : compact ? "Start free" : `Choose ${tier.name}`}
+                  {tier.name === "Custom" || tier.name === "Enterprise" ? "Talk to sales" : compact ? "Start free" : `Choose ${tier.name}`}
                 </Link>
               </Button>
             </div>

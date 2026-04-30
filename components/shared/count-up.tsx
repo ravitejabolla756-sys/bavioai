@@ -29,7 +29,7 @@ export function CountUp({
           if (!entry.isIntersecting || started.current) return;
           started.current = true;
           const start = performance.now();
-          const duration = 2000;
+          const duration = 280;
 
           const frame = (now: number) => {
             const progress = Math.min((now - start) / duration, 1);

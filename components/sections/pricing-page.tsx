@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CustomerLogosBar, ReviewBadges, TestimonialQuotes } from "@/components/shared/trust-elements";
 import { formatNumber } from "@/lib/utils";
 
 const plans = [
@@ -110,7 +111,7 @@ export function PricingPageContent() {
 
         <div className="mt-12 grid gap-5 lg:grid-cols-3">
           {plans.map((plan) => (
-            <Card key={plan.name} className={`relative p-8 ${plan.featured ? "border-[var(--border-brand)] bg-[rgba(123,47,190,0.05)]" : ""}`}>
+            <Card key={plan.name} className={`relative p-8 ${plan.featured ? "border-[var(--border-brand)] bg-[rgba(255,107,0,0.05)]" : ""}`}>
               {plan.featured ? (
                 <div className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--brand)] px-4 py-1 text-xs font-bold uppercase tracking-[0.12em] text-black">
                   Most Popular
@@ -149,6 +150,10 @@ export function PricingPageContent() {
               </Button>
             </Card>
           ))}
+        </div>
+
+        <div className="mt-10">
+          <ReviewBadges />
         </div>
 
         <div className="mt-10 rounded-[20px] border border-[var(--border-base)] bg-[var(--bg-raised)] p-6">
@@ -222,6 +227,12 @@ export function PricingPageContent() {
           </Card>
         </div>
       </div>
+
+      <div className="mt-14">
+        <CustomerLogosBar />
+      </div>
+
+      <TestimonialQuotes />
     </section>
   );
 }

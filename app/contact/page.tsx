@@ -50,8 +50,8 @@ export default function ContactPage() {
                 <Card className="p-5">
                   <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
                     <Mail className="h-4 w-4 text-[var(--brand)]" />
-                    <Link href="mailto:hello@bavio.in" className="transition hover:text-[var(--text-primary)]">
-                      hello@bavio.in
+                    <Link href="mailto:hello@bavio.ai" className="transition hover:text-[var(--text-primary)]">
+                      hello@bavio.ai
                     </Link>
                   </div>
                 </Card>

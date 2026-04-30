@@ -76,7 +76,7 @@ export function LiveDemoModal({
         </button>
 
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(124,58,237,0.18)] text-[var(--light-accent)]">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(255,107,0,0.18)] text-[var(--light-accent)]">
             <PhoneCall className="h-5 w-5" />
           </div>
           <div>
@@ -98,8 +98,8 @@ export function LiveDemoModal({
                   key={`${message.speaker}-${index}`}
                   className={
                     message.speaker === "Caller"
-                      ? "rounded-[16px] border border-[var(--text-faint)] bg-[#130f22] px-4 py-3 text-sm leading-7 text-[var(--text-primary)]"
-                      : "rounded-[16px] border border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.08)] px-4 py-3 text-sm leading-7 text-[var(--light-accent)]"
+                      ? "rounded-[16px] border border-[#2A2A2A] bg-[#1F1F1F] px-4 py-3 text-sm leading-7 text-[var(--text-primary)]"
+                      : "rounded-[16px] border border-[#FF6B0033] bg-[#FF6B0015] px-4 py-3 text-sm leading-7 text-[#FFB380]"
                   }
                 >
                   <p className="mb-1 text-[11px] uppercase tracking-[0.14em] text-[var(--text-secondary)]">{message.speaker}</p>
@@ -140,3 +140,4 @@ export function LiveDemoModal({
     </div>
   );
 }
+

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import { BarChart3, Bot, CreditCard, Gauge, LayoutDashboard, Phone, Settings, Sparkles, Users, X } from "lucide-react";
+import { BarChart3, Bot, CreditCard, Gauge, GitBranch, LayoutDashboard, Library, Mic2, Phone, PhoneCall, Settings, Sparkles, Users, X } from "lucide-react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
@@ -19,7 +19,14 @@ const titles: Record<string, string> = {
   "/dashboard/minutes": "Minutes",
   "/dashboard/leads": "Leads",
   "/dashboard/assistant": "Agents",
+  "/dashboard/agents": "Agents",
   "/dashboard/analytics": "Analytics",
+  "/dashboard/workflows": "Workflows",
+  "/dashboard/knowledge": "Knowledge",
+  "/dashboard/integrations": "Integrations",
+  "/dashboard/phone-numbers": "Phone Numbers",
+  "/dashboard/voices": "Voices",
+  "/dashboard/team": "Team",
   "/dashboard/billing": "Billing",
   "/dashboard/subscription": "Subscription",
   "/dashboard/settings": "Settings"
@@ -31,9 +38,15 @@ const mobileItems = [
   { href: "/dashboard/calls", label: "Calls", icon: Phone },
   { href: "/dashboard/minutes", label: "Minutes", icon: Gauge },
   { href: "/dashboard/leads", label: "Leads", icon: Users },
-  { href: "/dashboard/assistant", label: "Agents", icon: Bot },
+  { href: "/dashboard/agents", label: "Agents", icon: Bot },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/subscription", label: "Subscription", icon: CreditCard },
+  { href: "/dashboard/workflows", label: "Workflows", icon: GitBranch },
+  { href: "/dashboard/knowledge", label: "Knowledge", icon: Library },
+  { href: "/dashboard/integrations", label: "Integrations", icon: Sparkles },
+  { href: "/dashboard/phone-numbers", label: "Phone Numbers", icon: PhoneCall },
+  { href: "/dashboard/voices", label: "Voices", icon: Mic2 },
+  { href: "/dashboard/team", label: "Team", icon: Users },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/settings", label: "Settings", icon: Settings }
 ];
 
@@ -69,16 +82,16 @@ export default function DashboardLayout({
   return (
     <div className="dashboard-theme flex min-h-screen bg-background">
       <DashboardSidebar />
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <DashboardTopBar title={title} onOpenMobileNav={() => setOpen(true)} />
-        <main className="flex-1 px-5 py-6 lg:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-6 sm:px-5 lg:px-8">{children}</main>
       </div>
 
       <div className={cn("fixed inset-0 z-[150] bg-[rgba(8,6,0,0.96)] transition lg:hidden", open ? "opacity-100" : "pointer-events-none opacity-0")}>
         <div className={cn("absolute inset-y-0 left-0 w-[280px] bg-surface p-5 transition", open ? "translate-x-0" : "-translate-x-full")}>
           <div className="flex items-center justify-between">
             <Logo href="/dashboard" tone="dashboard" />
-            <button type="button" onClick={() => setOpen(false)} aria-label="Close navigation">
+            <button type="button" onClick={() => setOpen(false)} className="flex h-11 w-11 items-center justify-center" aria-label="Close navigation">
               <X className="h-5 w-5 text-foreground" />
             </button>
           </div>
@@ -92,7 +105,7 @@ export default function DashboardLayout({
                   onClick={() => setOpen(false)}
                   className={cn(
                     "flex items-center gap-3 rounded-[8px] px-4 py-3 text-sm",
-                    pathname === item.href ? "bg-[rgba(123,47,190,0.16)] text-foreground" : "text-muted"
+                    pathname === item.href ? "bg-[rgba(255,107,0,0.16)] text-foreground" : "text-muted"
                   )}
                 >
                   <Icon className="h-4 w-4" />

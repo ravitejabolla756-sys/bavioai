@@ -118,7 +118,7 @@ export default function ChangelogPage() {
                 <h2 className="mt-2 text-3xl font-black tracking-[-0.04em] text-[var(--text-primary)]">Get notified when we ship.</h2>
                 <p className="mt-3 text-sm text-[var(--text-secondary)]">We email once a week with what shipped, what&apos;s coming, and what we learned.</p>
               </div>
-              <form className="flex w-full max-w-sm gap-2" method="POST" action="/api/subscribe">
+              <form className="flex w-full max-w-sm gap-2" method="GET" action="/subscribe-success">
                 <input type="email" name="email" placeholder="you@company.in"
                   className="h-11 flex-1 rounded-[8px] border border-[var(--border-base)] bg-[var(--bg-base)] px-4 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--brand)] focus:outline-none" />
                 <button type="submit" className="h-11 rounded-[8px] bg-[var(--brand)] px-4 text-sm font-semibold text-black transition hover:bg-[var(--brand-hover)]">

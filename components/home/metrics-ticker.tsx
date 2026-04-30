@@ -11,7 +11,7 @@ export function MetricsTicker() {
           { value: 12, suffix: "", label: "Languages supported" }
         ].map((metric, index) => (
           <div key={metric.label} className={`text-center ${index < 3 ? "md:border-r md:border-border" : ""}`}>
-            <div className="text-[48px] font-extrabold tracking-[-0.04em] text-white">
+            <div className="text-[48px] font-extrabold tracking-[-0.04em] text-[var(--accent)]">
               <CountUp value={metric.value} suffix={metric.suffix} currency={metric.currency} />
             </div>
             <p className="mt-2 text-[14px] text-muted">{metric.label}</p>

@@ -17,7 +17,7 @@ export function TrustBadges() {
             <div
               key={badge.label}
               className="flex items-center gap-2 text-[12px] text-secondary"
-              style={{ animation: `fadeUp 600ms ease-out ${index * 80}ms both` }}
+              style={{ animation: `fadeUp 260ms ease-out ${index * 40}ms both` }}
             >
               <Icon className="h-[14px] w-[14px] text-primary" />
               <span>{badge.label}</span>

@@ -38,7 +38,7 @@ export default function SignupPage() {
     <PageTransition>
       <section className="min-h-screen bg-[var(--bg-base)] pt-24">
         <div className="grid min-h-[calc(100vh-96px)] lg:grid-cols-[0.84fr_1.16fr]">
-          <div className="relative flex items-center overflow-hidden border-r border-[var(--border-base)] bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_40%),linear-gradient(180deg,#111028,#08070f)] px-6 py-12 lg:px-12">
+          <div className="relative flex items-center overflow-hidden border-r border-[var(--border-base)] bg-[radial-gradient(circle_at_top,rgba(255,107,0,0.18),transparent_40%),linear-gradient(180deg,#161616,#111111)] px-6 py-12 lg:px-12">
             <div className="hero-noise absolute inset-0 opacity-80" />
             <div className="relative z-[1] mx-auto w-full max-w-[420px]">
               <Logo />
@@ -54,7 +54,7 @@ export default function SignupPage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-10 rounded-[20px] border border-[var(--border-base)] bg-[rgba(124,58,237,0.08)] p-6">
+              <div className="mt-10 rounded-[20px] border border-[var(--border-base)] bg-[rgba(255,107,0,0.08)] p-6">
                 <p className="text-lg leading-8 text-[var(--text-primary)]">
                   "Hamne weekend leads khona band kar diya. Bavio picks up every enquiry and sends us the right details on
                   WhatsApp before we even call back."
@@ -77,7 +77,7 @@ export default function SignupPage() {
                     const Icon = feature.icon;
                     return (
                       <div key={feature.title} className="rounded-[18px] border border-[var(--border-base)] bg-[var(--bg-raised)] p-6">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-[12px] border border-[rgba(192,132,252,0.2)] bg-[rgba(124,58,237,0.2)] text-[var(--light-accent)]">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-[12px] border border-[rgba(192,132,252,0.2)] bg-[rgba(255,107,0,0.2)] text-[var(--light-accent)]">
                           <Icon className="h-5 w-5" />
                         </div>
                         <h3 className="mt-4 text-lg font-bold text-[var(--text-primary)]">{feature.title}</h3>
@@ -113,3 +113,4 @@ export default function SignupPage() {
     </PageTransition>
   );
 }
+

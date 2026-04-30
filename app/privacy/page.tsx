@@ -20,6 +20,12 @@ export default function PrivacyPage() {
             <h1 className="mt-6 text-5xl font-black tracking-[-0.05em] text-[var(--text-primary)]">Privacy Policy</h1>
           </div>
           <div className="legal-prose mt-10">
+            <section>
+              <h2>Regulatory coverage</h2>
+              <p>
+                This policy supports GDPR and India DPDP compliance requirements. You can also manage consent through our cookie banner and submit data deletion requests through our dedicated form.
+              </p>
+            </section>
             {PRIVACY_SECTIONS.map((section) => (
               <section key={section.title}>
                 <h2>{section.title}</h2>

@@ -8,8 +8,12 @@ import {
   Bot,
   CreditCard,
   Gauge,
+  GitBranch,
+  Library,
   LayoutDashboard,
+  Mic2,
   Phone,
+  PhoneCall,
   Settings,
   Sparkles,
   Users
@@ -27,8 +31,14 @@ const items = [
   { href: "/dashboard/minutes", label: "Minutes", icon: Gauge },
   { href: "/dashboard/leads", label: "Leads", icon: Users },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/dashboard/assistant", label: "Agents", icon: Bot },
-  { href: "/dashboard/subscription", label: "Subscription", icon: CreditCard },
+  { href: "/dashboard/agents", label: "Agents", icon: Bot },
+  { href: "/dashboard/workflows", label: "Workflows", icon: GitBranch },
+  { href: "/dashboard/knowledge", label: "Knowledge", icon: Library },
+  { href: "/dashboard/integrations", label: "Integrations", icon: Sparkles },
+  { href: "/dashboard/phone-numbers", label: "Phone Numbers", icon: PhoneCall },
+  { href: "/dashboard/voices", label: "Voices", icon: Mic2 },
+  { href: "/dashboard/team", label: "Team", icon: Users },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/settings", label: "Settings", icon: Settings }
 ];
 
@@ -39,7 +49,7 @@ export function DashboardSidebar() {
   return (
     <aside className="flex h-screen w-full max-w-[248px] flex-col border-r border-border bg-surface px-4 py-5 max-lg:hidden">
       <Logo href="/dashboard" className="px-2" tone="dashboard" />
-      <div className="mt-6 rounded-[18px] border border-border bg-[rgba(123,47,190,0.08)] px-4 py-3">
+      <div className="mt-6 rounded-[18px] border border-border bg-[rgba(255,107,0,0.08)] px-4 py-3">
         <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(16,185,129,0.22)] bg-[rgba(16,185,129,0.08)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent-green)]">
           <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-green)] animate-pulse-soft" />
           Live workspace
@@ -60,7 +70,7 @@ export function DashboardSidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-[12px] px-4 py-3 text-sm font-medium transition",
                 active
-                  ? "border border-[var(--border-brand)] bg-[rgba(123,47,190,0.16)] text-[var(--text-primary)] shadow-[0_0_0_1px_rgba(123,47,190,0.15)]"
+                  ? "border border-[var(--border-brand)] bg-[rgba(255,107,0,0.16)] text-[var(--text-primary)] shadow-[0_0_0_1px_rgba(255,107,0,0.15)]"
                   : "text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]"
               )}
             >
@@ -72,7 +82,7 @@ export function DashboardSidebar() {
       </nav>
       <div className="mt-auto rounded-[18px] border border-border bg-[var(--bg-base)] p-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#7B2FBE,#A855F7)] font-heading text-sm font-bold text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#E55A00,#FF6B00)] font-heading text-sm font-bold text-white">
             {(user?.name || user?.email || "B").slice(0, 1).toUpperCase()}
           </div>
           <div className="min-w-0">
@@ -91,3 +101,4 @@ export function DashboardSidebar() {
     </aside>
   );
 }
+

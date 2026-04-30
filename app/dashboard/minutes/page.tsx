@@ -72,7 +72,7 @@ export default function DashboardMinutesPage() {
               <div
                 className="absolute inset-0 rounded-full border-[14px] border-transparent"
                 style={{
-                  background: `conic-gradient(${usagePercent > 85 ? "#EF4444" : usagePercent > 60 ? "#F59E0B" : "#7B2FBE"} ${usagePercent * 3.6}deg, transparent 0deg)`,
+                  background: `conic-gradient(${usagePercent > 85 ? "#EF4444" : usagePercent > 60 ? "#F59E0B" : "#E55A00"} ${usagePercent * 3.6}deg, transparent 0deg)`,
                   WebkitMask: "radial-gradient(circle at center, transparent 64%, black 65%)",
                   mask: "radial-gradient(circle at center, transparent 64%, black 65%)"
                 }}
@@ -115,3 +115,4 @@ export default function DashboardMinutesPage() {
     </div>
   );
 }
+

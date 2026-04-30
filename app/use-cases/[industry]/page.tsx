@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "@/components/shared/page-transition";
 import { INDUSTRY_USE_CASES } from "@/lib/constants";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, getFaqJsonLd } from "@/lib/seo";
 
 type Params = {
   params: { industry: string };
@@ -37,6 +37,20 @@ export default function IndustryUseCasePage({ params }: Params) {
   const item = INDUSTRY_USE_CASES.find((entry) => entry.id === resolvedIndustry);
 
   if (!item) notFound();
+  const jsonLd = getFaqJsonLd([
+    {
+      question: `How does Bavio AI help ${item.title.toLowerCase()} teams?`,
+      answer: item.summary
+    },
+    {
+      question: `What workflows can Bavio automate for ${item.title.toLowerCase()}?`,
+      answer: item.workflow.join(", ")
+    },
+    {
+      question: `What outcomes can ${item.title.toLowerCase()} teams track?`,
+      answer: item.metrics.join(", ")
+    }
+  ]);
 
   return (
     <PageTransition>
@@ -116,6 +130,7 @@ export default function IndustryUseCasePage({ params }: Params) {
           </Card>
         </div>
       </section>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </PageTransition>
   );
 }

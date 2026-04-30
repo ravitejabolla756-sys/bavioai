@@ -1,31 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Check, CirclePlay } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { ArrowRight, Check, CirclePlay, Globe2, Mic, ShieldCheck, Sparkles, Waves, Workflow } from "lucide-react";
 
 import { LiveDemoModal } from "@/components/home/live-demo-modal";
 import { SectionReveal } from "@/components/shared/section-reveal";
+import { CustomerLogosBar, PressMentions, TestimonialQuotes } from "@/components/shared/trust-elements";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatNumber } from "@/lib/utils";
 
-const stats = [
-  ["<500ms", "Response speed"],
-  ["24/7", "Always answering"],
-  ["60%", "Calls go unanswered"],
-  ["₹1.32", "Average cost / min"],
-  ["63M", "Indian SMBs"]
+const trustStats = [
+  ["<500ms", "Latency"],
+  ["99.9%", "Uptime SLA"],
+  ["SOC 2 Type II", "In Progress"]
 ];
 
+const integrationPills = ["HubSpot", "Twilio", "Cal.com", "Google Calendar", "Salesforce", "Zoho"];
+
+const marqueeStats = ["2,000+ agents deployed", "1,284,233 calls handled today", "742 agents active now", "Trusted by global teams"];
+
 const features = [
-  { title: "Real-time Voice AI", copy: "Answers instantly with context-aware, natural conversation handling." },
-  { title: "Multi-language", copy: "Understands Hindi, English, and Hinglish without rigid menu trees." },
-  { title: "24/7 Automation", copy: "Keeps your business live after hours without hiring another shift." },
-  { title: "Lead Capture", copy: "Collects name, phone, budget, and intent while the call is happening." },
-  { title: "WhatsApp Alerts", copy: "Sends follow-up and handoff context straight to your team." },
-  { title: "Analytics Dashboard", copy: "Shows minutes, call outcomes, and lead performance in one place." }
+  { title: "Real-time Voice Processing", copy: "Natural turn-taking and low-latency responses for live production calls.", icon: Waves },
+  { title: "Workflow Automation", copy: "Execute CRM updates, bookings, and handoff logic directly from conversations.", icon: Workflow },
+  { title: "Lead Qualification", copy: "Capture intent, budget, urgency, and next-best action during the call itself.", icon: Sparkles },
+  { title: "Multilingual Support", copy: "Deploy AI agents in 20+ languages with regional switching and fallback behavior.", icon: Globe2 },
+  { title: "Custom Voice Cloning", copy: "Train AI on your brand voice for consistent customer-facing communication.", icon: Mic }
+];
+
+const integrationGrid = [
+  "HubSpot", "Salesforce", "Zoho CRM", "Pipedrive", "Google Calendar", "Outlook", "Cal.com", "Twilio", "MessageBird", "Vonage",
+  "Zendesk", "Freshdesk", "Intercom", "Slack", "WhatsApp", "Stripe", "Razorpay", "Zapier", "Make", "Shopify",
+  "Exotel", "Plivo", "RingCentral", "Airtable"
+];
+
+const caseStudies = [
+  {
+    company: "MedCenter Clinic",
+    vertical: "Healthcare",
+    metric: "78% fewer missed appointments",
+    quote: "Bavio became our 24/7 front desk in under a week."
+  },
+  {
+    company: "UrbanEstate Group",
+    vertical: "Real Estate",
+    metric: "2.3x more qualified calls",
+    quote: "Lead quality improved immediately because every call gets qualified."
+  },
+  {
+    company: "FixFast Field Ops",
+    vertical: "Field Service",
+    metric: "41% faster dispatch conversion",
+    quote: "The AI books jobs and routes details before a human even picks up."
+  }
 ];
 
 const pricingPlans = [
@@ -33,28 +62,35 @@ const pricingPlans = [
     name: "Starter",
     price: 1999,
     href: "/signup?plan=starter",
-    description: "For early teams that want to stop missing calls fast.",
-    features: ["200 minutes included", "Hindi + English support", "Lead capture", "WhatsApp alerts"]
+    features: ["200 minutes", "Core workflows", "Email support"]
   },
   {
-    name: "Growth",
-    price: 3999,
-    href: "/signup?plan=growth",
-    description: "For live businesses that need automation and deeper analytics.",
-    features: ["500 minutes included", "Advanced analytics", "CRM sync", "Priority onboarding"],
+    name: "Professional",
+    price: 4999,
+    href: "/signup?plan=professional",
+    features: ["500 minutes", "Advanced analytics", "Integrations", "Priority support"],
     featured: true
   },
   {
-    name: "Scale",
-    price: 7999,
-    href: "/signup?plan=scale",
-    description: "For high-volume teams that need multi-number coverage.",
-    features: ["1,500 minutes included", "Custom AI persona", "Priority support", "Dedicated setup"]
+    name: "Enterprise",
+    price: 14999,
+    href: "/signup?plan=enterprise",
+    features: ["Custom volume", "SSO + RBAC", "Dedicated success", "SLA options"]
   }
 ];
 
 export function Homepage() {
   const [demoOpen, setDemoOpen] = useState(false);
+  const [roiCalls, setRoiCalls] = useState(100);
+  const [roiTicket, setRoiTicket] = useState(1500);
+  const [roiMissed, setRoiMissed] = useState(35);
+  const [callLive, setCallLive] = useState(false);
+
+  const roi = useMemo(() => {
+    const dailyLoss = roiCalls * (roiMissed / 100) * roiTicket;
+    const monthlyLoss = dailyLoss * 30;
+    return { dailyLoss, monthlyLoss };
+  }, [roiCalls, roiMissed, roiTicket]);
 
   return (
     <div className="bg-[var(--bg-base)]">
@@ -62,137 +98,173 @@ export function Homepage() {
 
       <section className="relative overflow-hidden pt-16">
         <div className="hero-grid absolute inset-0" />
-        <div className="absolute left-1/2 top-20 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(124,58,237,0.1),transparent_68%)] blur-[72px]" />
-        <div className="container relative z-[1] grid min-h-[calc(100vh-120px)] items-center gap-14 py-16 lg:grid-cols-[0.55fr_0.45fr]">
-          <SectionReveal className="max-w-[680px]">
-            <Badge className="gap-2 rounded-full border border-[rgba(192,132,252,0.22)] bg-[rgba(124,58,237,0.1)] px-4 py-2 text-[13px] text-[var(--text-primary)]">
+        <div className="container relative z-[1] grid min-h-[calc(100vh-120px)] items-center gap-10 py-16 lg:grid-cols-[0.55fr_0.45fr]">
+          <SectionReveal className="max-w-[720px]">
+            <Badge className="gap-2 rounded-full border border-[rgba(192,132,252,0.22)] bg-[rgba(255,107,0,0.1)] px-4 py-2 text-[13px] text-[var(--text-primary)]">
               <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--brand)]" />
-              Now live for Indian businesses
+              Clarity Over Complexity
             </Badge>
-            <h1 className="mt-7 font-heading text-[clamp(46px,8vw,88px)] font-[800] leading-[0.92] tracking-[-0.06em] text-[var(--text-primary)]">
-              Your AI that answers{" "}
-              <span className="text-gradient">every call. Forever.</span>
+            <h1 className="mt-7 font-heading text-[clamp(44px,8vw,86px)] font-[800] leading-[0.92] tracking-[-0.05em] text-white">
+              Autonomous Voice Agents{" "}
+              <span className="text-gradient">for Business Calls</span>
             </h1>
-            <p className="mt-6 max-w-[580px] text-[18px] font-light leading-[1.8] text-[var(--text-secondary)]">
-              Bavio answers every business call, captures the lead, books the next step, and keeps your team updated on WhatsApp.
+            <p className="mt-6 max-w-[640px] text-[18px] leading-[1.8] text-[var(--text-secondary)]">
+              Deploy AI that answers calls, reduces missed calls, qualifies leads, books appointments, and executes workflows in real time.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" asChild>
                 <Link href="/signup">
-                  Start Free Trial
+                  Start Building Free
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="ghost" type="button" onClick={() => setDemoOpen(true)}>
                 <CirclePlay className="mr-2 h-4 w-4" />
-                Hear a live demo
+                Watch Demo
               </Button>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-2">
+              {integrationPills.map((item) => (
+                <span key={item} className="rounded-full border border-[var(--border-base)] bg-[var(--bg-raised)] px-3 py-1 text-xs text-[var(--text-secondary)]">
+                  {item}
+                </span>
+              ))}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {trustStats.map(([value, label]) => (
+                <span key={label} className="rounded-full border border-[var(--border-brand)] bg-[var(--brand-dim)] px-3 py-1 text-xs text-[var(--light-accent)]">
+                  {value} {label}
+                </span>
+              ))}
+            </div>
+            <div className="mt-4 flex flex-wrap gap-3 text-xs text-[var(--text-secondary)]">
+              <Link href="/status" className="underline underline-offset-4">
+                Public status page
+              </Link>
+              <Link href="/benchmarks/voice-latency" className="underline underline-offset-4">
+                Voice latency benchmarks
+              </Link>
             </div>
           </SectionReveal>
 
           <SectionReveal>
-            <Card className="overflow-hidden border-[var(--border-base)] p-6 md:p-8">
-              <div className="mb-6 flex items-center justify-between">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.08)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#fca5a5]">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-[#ef4444]" />
-                  Live
-                </div>
-                <span className="text-xs uppercase tracking-[0.14em] text-[var(--text-faint)]">00:47</span>
-              </div>
-              <div className="grid gap-5 lg:grid-cols-[1fr_0.9fr]">
-                <div className="space-y-3">
-                  {[
-                    { speaker: "Caller", copy: "Hi, I need pricing details for my clinic.", bubble: "border-[var(--text-faint)] bg-[#130f22] text-[var(--text-primary)]" },
-                    { speaker: "Bavio AI", copy: "Absolutely. Are you looking for appointment booking, reminders, or lead capture?", bubble: "border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.08)] text-[var(--light-accent)]" },
-                    { speaker: "Caller", copy: "Mostly after-hours booking and WhatsApp follow-up.", bubble: "border-[var(--text-faint)] bg-[#130f22] text-[var(--text-primary)]" },
-                    { speaker: "Bavio AI", copy: "Perfect. Growth plan fits best. I can also share the plan summary with your team on WhatsApp.", bubble: "border-[rgba(124,58,237,0.2)] bg-[rgba(124,58,237,0.08)] text-[var(--light-accent)]" }
-                  ].map((message) => (
-                    <div key={message.copy} className={`rounded-[16px] border px-4 py-3 text-sm leading-7 ${message.bubble}`}>
-                      <p className="mb-1 text-[11px] uppercase tracking-[0.14em] text-[var(--text-secondary)]">{message.speaker}</p>
-                      {message.copy}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="rounded-[16px] border border-[var(--border-base)] bg-[var(--bg-base)] p-5">
-                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--light-accent)]">AI actions</p>
-                  <div className="mt-5 space-y-3">
-                    {[
-                      { label: "Call answered", done: true },
-                      { label: "Language detected", done: true },
-                      { label: "Intent recognized", done: true },
-                      { label: "Lead data captured", done: true },
-                      { label: "WhatsApp follow-up queued", done: false }
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center justify-between rounded-[14px] border border-[var(--border-base)] bg-[var(--bg-overlay)] px-4 py-3 text-sm">
-                        <div className="flex items-center gap-3">
-                          <span className={item.done ? "h-2.5 w-2.5 rounded-full bg-[var(--accent-green)]" : "h-2.5 w-2.5 rounded-full bg-[var(--text-faint)]"} />
-                          <span className={item.done ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}>{item.label}</span>
-                        </div>
-                        <span className="text-[var(--text-faint)]">{item.done ? "Done" : "Pending"}</span>
-                      </div>
+            <Card className="overflow-hidden p-6">
+              <p className="eyebrow">Live call simulation</p>
+              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                <div className="rounded-[14px] border border-[var(--border-base)] bg-[var(--bg-overlay)] p-4">
+                  <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">Incoming call</p>
+                  <p className="mt-2 text-sm text-[var(--text-primary)]">+1 (415) 555 0197</p>
+                  <div className="mt-4 flex h-12 items-end gap-1">
+                    {Array.from({ length: 20 }).map((_, i) => (
+                      <span key={i} className="w-1 rounded-full bg-[var(--brand)]" style={{ height: `${10 + ((i * 7) % 24)}px` }} />
                     ))}
                   </div>
                 </div>
+                <div className="rounded-[14px] border border-[var(--border-base)] bg-[var(--bg-overlay)] p-4">
+                  <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-muted)]">AI processing</p>
+                  <div className="mt-2 space-y-2 text-sm">
+                    <p className="text-[var(--text-primary)]">Intent: appointment booking</p>
+                    <p className="text-[var(--text-secondary)]">Language: English</p>
+                    <p className="text-[var(--accent-green)]">Action: Calendar slot suggested</p>
+                  </div>
+                </div>
               </div>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Button type="button" onClick={() => setCallLive((v) => !v)}>
+                  Try It Now - Call Our AI
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link href="/playground">Open Playground</Link>
+                </Button>
+              </div>
+              {callLive ? (
+                <div className="mt-4 rounded-[14px] border border-[var(--border-brand)] bg-[var(--brand-dim)] p-4 text-sm">
+                  <p className="text-xs uppercase tracking-[0.12em] text-[var(--light-accent)]">Real-time transcript</p>
+                  <p className="mt-2 text-[var(--text-primary)]">Caller: I need to schedule a service visit tomorrow.</p>
+                  <p className="mt-1 text-[var(--text-secondary)]">Bavio AI: I found slots at 10:30 AM and 2:00 PM. Which one works best?</p>
+                </div>
+              ) : null}
             </Card>
           </SectionReveal>
         </div>
       </section>
 
-      <section className="border-y border-[var(--border-base)] py-6">
-        <div className="container grid gap-4 md:grid-cols-5">
-          {stats.map(([value, label]) => (
-            <div key={label} className="text-center">
-              <p className="font-heading text-[28px] font-[800] tracking-[-0.04em] text-white">{value}</p>
-              <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-[var(--text-secondary)]">{label}</p>
-            </div>
-          ))}
+      <CustomerLogosBar />
+
+      <section className="border-y border-[var(--border-base)] py-4">
+        <div className="container overflow-hidden">
+          <div className="flex min-w-max animate-marquee-left gap-8 text-sm text-[var(--text-secondary)]">
+            {[...marqueeStats, ...marqueeStats, ...marqueeStats].map((item, index) => (
+              <span key={`${item}-${index}`}>{item}</span>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="section-shell">
         <div className="container">
           <SectionReveal className="section-header text-center">
-            <span className="eyebrow">Features</span>
-            <h2 className="section-title">Everything your voice workflow needs to go live fast.</h2>
+            <span className="eyebrow">Platform capabilities</span>
+            <h2 className="section-title">Everything needed to run production voice automation.</h2>
           </SectionReveal>
           <div className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {features.map((feature, index) => (
-              <SectionReveal key={feature.title} delay={index * 70}>
-                <Card className="h-full p-6">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-[12px] border border-[rgba(124,58,237,0.24)] bg-[rgba(124,58,237,0.2)] text-[var(--light-accent)]">
-                    {index + 1}
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <Card key={feature.title} className="h-full p-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[var(--border-brand)] bg-[var(--brand-dim)] text-[var(--light-accent)]">
+                    <Icon className="h-5 w-5" />
                   </div>
                   <h3 className="mt-4 font-heading text-2xl font-bold text-white">{feature.title}</h3>
                   <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{feature.copy}</p>
                 </Card>
-              </SectionReveal>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
+      <TestimonialQuotes />
+
       <section className="section-shell pt-0">
         <div className="container">
           <SectionReveal className="section-header text-center">
-            <span className="eyebrow">How it works</span>
-            <h2 className="section-title">From signup to live in four simple steps.</h2>
+            <span className="eyebrow">Integrations showcase</span>
+            <h2 className="section-title">Connect instantly with your existing stack.</h2>
           </SectionReveal>
-          <div className="relative mt-12 grid gap-5 lg:grid-cols-4">
-            <div className="absolute left-0 right-0 top-5 hidden h-px bg-[var(--text-faint)] lg:block" />
-            {[
-              ["01", "Sign Up", "Create your workspace and choose the plan that fits your volume."],
-              ["02", "Configure AI", "Set your business context, language, and first-response behavior."],
-              ["03", "Get Your Number", "Connect your number and route inbound calls through Bavio."],
-              ["04", "Go Live", "Start answering every call and capture every lead automatically."]
-            ].map(([number, title, copy]) => (
-              <Card key={title} className="relative z-[1] p-6">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--text-faint)] bg-[#130f22] font-heading text-sm font-bold text-[var(--light-accent)]">
-                  {number}
-                </div>
-                <h3 className="mt-5 font-heading text-xl font-bold text-white">{title}</h3>
-                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{copy}</p>
+          <div className="mt-12 grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
+            {integrationGrid.map((item) => (
+              <div key={item} className="rounded-[12px] border border-[var(--border-base)] bg-[var(--bg-raised)] px-4 py-3 text-center text-sm text-[var(--text-secondary)]">
+                {item}
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Button variant="ghost" asChild>
+              <Link href="/integrations">
+                See All 50+ Integrations
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <PressMentions />
+
+      <section className="section-shell pt-0">
+        <div className="container">
+          <SectionReveal className="section-header text-center">
+            <span className="eyebrow">Case studies</span>
+            <h2 className="section-title">Measured outcomes from production deployments.</h2>
+          </SectionReveal>
+          <div className="mt-12 grid gap-5 lg:grid-cols-3">
+            {caseStudies.map((item) => (
+              <Card key={item.company} className="p-6">
+                <p className="text-xs uppercase tracking-[0.12em] text-[var(--text-faint)]">{item.vertical}</p>
+                <h3 className="mt-2 text-2xl font-bold text-white">{item.company}</h3>
+                <p className="mt-3 text-sm font-semibold text-[var(--accent-green)]">{item.metric}</p>
+                <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">"{item.quote}"</p>
               </Card>
             ))}
           </div>
@@ -201,9 +273,46 @@ export function Homepage() {
 
       <section className="section-shell pt-0">
         <div className="container">
+          <Card className="p-8">
+            <SectionReveal className="section-header text-center">
+              <span className="eyebrow">ROI calculator</span>
+              <h2 className="section-title">How much are unanswered calls costing you?</h2>
+            </SectionReveal>
+            <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_0.9fr]">
+              <div className="space-y-6">
+                <div>
+                  <p className="mb-2 text-sm text-[var(--text-secondary)]">Calls per day: {roiCalls}</p>
+                  <input className="w-full accent-[var(--brand)]" type="range" min={10} max={500} step={10} value={roiCalls} onChange={(e) => setRoiCalls(Number(e.target.value))} />
+                </div>
+                <div>
+                  <p className="mb-2 text-sm text-[var(--text-secondary)]">Average ticket value: INR {formatNumber(roiTicket)}</p>
+                  <input className="w-full accent-[var(--brand)]" type="range" min={500} max={10000} step={100} value={roiTicket} onChange={(e) => setRoiTicket(Number(e.target.value))} />
+                </div>
+                <div>
+                  <p className="mb-2 text-sm text-[var(--text-secondary)]">% currently missed: {roiMissed}%</p>
+                  <input className="w-full accent-[var(--brand)]" type="range" min={5} max={80} step={1} value={roiMissed} onChange={(e) => setRoiMissed(Number(e.target.value))} />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="rounded-[14px] border border-[var(--border-base)] bg-[var(--bg-overlay)] p-5">
+                  <p className="text-sm text-[var(--text-secondary)]">Estimated monthly loss</p>
+                  <p className="mt-2 text-3xl font-black text-[var(--accent-red)]">INR {formatNumber(Math.round(roi.monthlyLoss))}</p>
+                </div>
+                <div className="rounded-[14px] border border-[var(--border-base)] bg-[var(--bg-overlay)] p-5">
+                  <p className="text-sm text-[var(--text-secondary)]">Bavio Professional plan</p>
+                  <p className="mt-2 text-3xl font-black text-[var(--accent-green)]">INR 4,999 / month</p>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      <section className="section-shell pt-0">
+        <div className="container">
           <SectionReveal className="section-header text-center">
-            <span className="eyebrow">Pricing</span>
-            <h2 className="section-title">Simple plans for every stage of growth.</h2>
+            <span className="eyebrow">Pricing preview</span>
+            <h2 className="section-title">Simple pricing with clear upgrade paths.</h2>
           </SectionReveal>
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
             {pricingPlans.map((plan) => (
@@ -215,10 +324,9 @@ export function Homepage() {
                 ) : null}
                 <p className="text-sm uppercase tracking-[0.16em] text-[var(--text-secondary)]">{plan.name}</p>
                 <div className="mt-4 flex items-end gap-2">
-                  <span className="text-4xl font-heading font-[800] tracking-[-0.05em] text-white">₹{formatNumber(plan.price)}</span>
+                  <span className="text-4xl font-heading font-[800] tracking-[-0.05em] text-white">INR {formatNumber(plan.price)}</span>
                   <span className="mb-1 text-sm text-[var(--text-secondary)]">/mo</span>
                 </div>
-                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{plan.description}</p>
                 <div className="mt-5 space-y-3">
                   {plan.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-3 text-sm text-[var(--text-primary)]">
@@ -227,37 +335,20 @@ export function Homepage() {
                     </div>
                   ))}
                 </div>
-                <Button asChild className="mt-7 w-full" variant={plan.featured ? "default" : "ghost"}>
-                  <Link href={plan.href}>Get Started</Link>
+                <p className="mt-5 rounded-[10px] border border-[var(--border-base)] bg-[var(--bg-overlay)] px-3 py-2 text-xs text-[var(--text-secondary)]">
+                  Cancel anytime, no questions asked.
+                </p>
+                <Button asChild className="mt-6 w-full" variant={plan.featured ? "default" : "ghost"}>
+                  <Link href={plan.href}>Choose {plan.name}</Link>
                 </Button>
               </Card>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden py-24">
-        <div className="absolute inset-x-0 bottom-0 h-[360px] bg-[radial-gradient(circle_at_center,rgba(124,58,237,0.16),transparent_65%)]" />
-        <div className="container relative z-[1] text-center">
-          <SectionReveal>
-            <h2 className="font-heading text-[clamp(40px,6vw,72px)] font-[800] leading-[0.98] tracking-[-0.05em] text-[var(--text-primary)]">
-              Ready to stop missing calls?
-            </h2>
-            <p className="mx-auto mt-5 max-w-[720px] text-lg leading-8 text-[var(--text-secondary)]">
-              Bavio gives your business an AI front desk that stays on, sounds natural, and never drops a lead.
-            </p>
-            <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button size="lg" asChild>
-                <Link href="/signup">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="ghost" type="button" onClick={() => setDemoOpen(true)}>
-                Hear a live demo
-              </Button>
-            </div>
-          </SectionReveal>
+          <div className="mt-8 text-center">
+            <Button variant="ghost" asChild>
+              <Link href="/pricing">View full pricing details</Link>
+            </Button>
+          </div>
         </div>
       </section>
     </div>

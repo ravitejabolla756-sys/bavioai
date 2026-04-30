@@ -116,7 +116,7 @@ export function SignupForm() {
           id="signup-industry"
           value={industry}
           onChange={(event) => setIndustry(event.target.value as (typeof industries)[number])}
-          className="flex h-11 w-full rounded-[12px] border border-[var(--border-base)] bg-[var(--bg-base)] px-4 text-[14px] text-[var(--text-primary)] transition-all duration-200 focus:border-[var(--brand)] focus:outline-none focus:shadow-[0_0_0_3px_rgba(124,58,237,0.18)]"
+          className="flex h-11 w-full rounded-[12px] border border-[var(--border-base)] bg-[var(--bg-base)] px-4 text-[14px] text-[var(--text-primary)] transition-all duration-200 focus:border-[var(--brand)] focus:outline-none focus:shadow-[0_0_0_3px_rgba(255,107,0,0.18)]"
         >
           {industries.map((option) => (
             <option key={option} value={option}>
@@ -176,7 +176,7 @@ export function SignupForm() {
       </div>
 
       {selectedPlan === "Growth" ? (
-        <Badge className="bg-[rgba(123,47,190,0.1)] text-[var(--brand)]">Most popular for live teams</Badge>
+        <Badge className="bg-[rgba(255,107,0,0.1)] text-[var(--brand)]">Most popular for live teams</Badge>
       ) : null}
 
       {error ? <p className="text-sm text-red-400">{error}</p> : null}
@@ -204,3 +204,4 @@ export function SignupForm() {
     </form>
   );
 }
+

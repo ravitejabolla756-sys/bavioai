@@ -13,8 +13,8 @@ export async function POST(request: Request) {
     const resend = getResendClient();
 
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "Bavio AI <website@bavio.in>",
-      to: ["hello@bavio.in"],
+      from: process.env.RESEND_FROM_EMAIL || "Bavio AI <website@bavio.ai>",
+      to: ["hello@bavio.ai"],
       replyTo: body.email,
       subject: `New demo request from ${body.company}`,
       html: `

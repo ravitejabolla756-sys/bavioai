@@ -12,9 +12,13 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/product", label: "Product" },
+  { href: "/use-cases", label: "Solutions" },
+  { href: "/integrations", label: "Integrations" },
+  { href: "/customers", label: "Customers" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/use-cases", label: "Use Cases" },
-  { href: "/docs", label: "Docs" }
+  { href: "/docs", label: "Docs" },
+  { href: "/changelog", label: "Changelog" },
+  { href: "/status", label: "Status" }
 ];
 
 export function Navbar({ locale }: { locale: "en" | "hi" }) {
@@ -43,7 +47,7 @@ export function Navbar({ locale }: { locale: "en" | "hi" }) {
     <>
       <header
         className={cn(
-          "relative left-0 right-0 z-40 border-b transition-all duration-300",
+          "relative left-0 right-0 z-40 border-b transition-all duration-200",
           scrolled
             ? "border-[var(--border-base)] bg-[rgba(8,7,15,0.85)] backdrop-blur-[12px]"
             : "border-[var(--border-base)] bg-[rgba(8,7,15,0.78)] backdrop-blur-[12px]"
@@ -52,15 +56,15 @@ export function Navbar({ locale }: { locale: "en" | "hi" }) {
         <div className="container mx-auto flex h-[72px] max-w-[1280px] items-center justify-between">
           <Logo />
 
-          <nav className="hidden items-center gap-6 lg:flex">
+          <nav className="hidden items-center gap-4 lg:flex xl:gap-5">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "text-sm font-medium transition hover:text-[var(--text-primary)]",
+                  "text-[13px] font-medium transition hover:text-[var(--text-primary)] xl:text-sm",
                   pathname === item.href || pathname.startsWith(`${item.href}/`)
-                    ? "text-[var(--text-primary)]"
+                    ? "text-[var(--accent)]"
                     : "text-[var(--text-secondary)]"
                 )}
               >
@@ -86,7 +90,7 @@ export function Navbar({ locale }: { locale: "en" | "hi" }) {
                 </Button>
                 <Button size="sm" asChild>
                   <Link href="/signup">
-                    Start Free Trial
+                    Start Free
                     <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                   </Link>
                 </Button>
@@ -97,7 +101,7 @@ export function Navbar({ locale }: { locale: "en" | "hi" }) {
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-[12px] border border-[var(--border-base)] bg-[var(--bg-raised)] text-[var(--text-primary)] lg:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-[12px] border border-[var(--border-base)] bg-[var(--bg-raised)] text-[var(--text-primary)] lg:hidden"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
@@ -107,7 +111,7 @@ export function Navbar({ locale }: { locale: "en" | "hi" }) {
 
       <div
         className={cn(
-          "fixed inset-0 z-[130] bg-[rgba(8,7,15,0.96)] transition-all duration-300 lg:hidden",
+          "fixed inset-0 z-[130] bg-[rgba(8,7,15,0.96)] transition-all duration-200 lg:hidden",
           mobileOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         )}
       >
@@ -117,7 +121,7 @@ export function Navbar({ locale }: { locale: "en" | "hi" }) {
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[var(--border-base)] text-[var(--text-primary)]"
+              className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-[var(--border-base)] text-[var(--text-primary)]"
               aria-label="Close menu"
             >
               <X className="h-5 w-5" />
@@ -131,7 +135,7 @@ export function Navbar({ locale }: { locale: "en" | "hi" }) {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "rounded-[14px] px-4 py-3 text-[28px] font-heading font-bold tracking-[-0.03em] transition",
+                  "rounded-[14px] px-4 py-3 text-[24px] font-heading font-bold tracking-[-0.03em] transition sm:text-[28px]",
                   pathname === item.href || pathname.startsWith(`${item.href}/`)
                     ? "bg-[var(--bg-raised)] text-[var(--text-primary)]"
                     : "text-[var(--text-secondary)] hover:bg-[var(--bg-raised)] hover:text-[var(--text-primary)]"
@@ -157,7 +161,7 @@ export function Navbar({ locale }: { locale: "en" | "hi" }) {
                 <>
                   <Button size="lg" asChild>
                     <Link href="/signup" onClick={() => setMobileOpen(false)}>
-                      Start Free Trial
+                      Start Free
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>

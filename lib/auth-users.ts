@@ -258,7 +258,7 @@ export async function getOrCreateUser(input: {
   }
 
   return createBusiness({
-    email: normalizedEmail || `${randomUUID()}@pending.bavio.in`,
+    email: normalizedEmail || `${randomUUID()}@pending.bavio.ai`,
     phone: input.phone,
     name: input.name,
     contactName: input.contactName,

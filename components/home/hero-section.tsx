@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { CallTranscript } from "@/components/shared/call-transcript";
+import { HeroParticles } from "@/components/shared/hero-particles";
 import { VoiceWaveform } from "@/components/shared/voice-waveform";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,21 +30,25 @@ export function HeroSection({
   }, []);
 
   return (
-    <section className="relative flex min-h-screen items-center overflow-hidden bg-black pt-8">
+    <section className="relative flex min-h-screen items-center overflow-hidden bg-[var(--bg)] pt-8">
+      <HeroParticles />
       <div className="grid-fade" />
       <div className="container relative z-[2] grid items-center gap-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)]">
         <div className="max-w-[680px]">
-          <div className="animate-[float-in_600ms_ease_forwards] opacity-0">
-            <Badge className="mb-6">India&apos;s AI voice platform for real business calls</Badge>
+          <div className="animate-[float-in_280ms_ease_forwards] opacity-0">
+            <Badge className="mb-6 border-[#FF6B0033] bg-[#FF6B0015]">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-[#FF6B00]" />
+              India&apos;s AI voice platform for real business calls
+            </Badge>
           </div>
-          <h1 className="display-title animate-[float-in_600ms_ease_200ms_forwards] opacity-0">
+          <h1 className="display-title animate-[float-in_280ms_ease_70ms_forwards] opacity-0">
             Autonomous Voice Agents for Every Business <span className="text-gradient">Call</span>
           </h1>
-          <p className="mt-6 max-w-[480px] animate-[float-in_600ms_ease_400ms_forwards] text-[18px] leading-[1.6] text-secondary opacity-0">
+          <p className="mt-6 max-w-[480px] animate-[float-in_280ms_ease_140ms_forwards] text-[18px] leading-[1.6] text-secondary opacity-0">
             Handle calls, qualify leads, and execute workflows automatically with production-ready voice AI built for
             real operations.
           </p>
-          <div className="mt-10 flex animate-[float-in_600ms_ease_600ms_forwards] flex-col gap-3 opacity-0 sm:flex-row">
+          <div className="mt-10 flex animate-[float-in_280ms_ease_210ms_forwards] flex-col gap-3 opacity-0 sm:flex-row">
             <Button size="lg" asChild>
               <Link href="/login">Start with Google</Link>
             </Button>
@@ -51,7 +56,7 @@ export function HeroSection({
               <Link href="/product">View Demo</Link>
             </Button>
           </div>
-          <div className="mt-8 flex animate-[float-in_600ms_ease_800ms_forwards] items-center gap-4 opacity-0">
+          <div className="mt-8 flex animate-[float-in_280ms_ease_280ms_forwards] items-center gap-4 opacity-0">
             <div className="flex -space-x-3">
               {["AK", "NS", "RV"].map((item) => (
                 <div

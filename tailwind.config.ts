@@ -14,7 +14,7 @@ const config: Config = {
       center: true,
       padding: "24px",
       screens: {
-        "2xl": "1200px"
+        "2xl": "1280px"
       }
     },
     extend: {
@@ -41,8 +41,8 @@ const config: Config = {
       },
       boxShadow: {
         card: "0 4px 24px rgba(0,0,0,0.4)",
-        saffron: "0 0 0 1px rgba(123,47,190,0.24), 0 18px 48px rgba(123,47,190,0.14)",
-        button: "0 0 24px rgba(123,47,190,0.24)",
+        saffron: "0 0 0 1px rgba(255,107,0,0.24), 0 18px 48px rgba(255,107,0,0.14)",
+        button: "0 0 24px rgba(255,107,0,0.24)",
         success: "0 0 20px rgba(34,197,94,0.2)"
       },
       keyframes: {

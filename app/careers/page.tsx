@@ -3,9 +3,9 @@ import { PageTransition } from "@/components/shared/page-transition";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
-  title: "Careers | Bavio AI — Build the Future of Business Communication",
+  title: "Careers | Bavio AI - Build the Future of Business Communication",
   description:
-    "Join Bavio AI and build the voice AI platform that serves 63M+ Indian businesses. 3 open roles — remote-friendly, real equity.",
+    "Join Bavio AI across engineering, product, sales, marketing, and operations. Remote-first culture with equity, learning budget, and health coverage.",
   path: "/careers"
 });
 

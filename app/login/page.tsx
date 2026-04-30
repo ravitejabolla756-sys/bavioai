@@ -60,7 +60,7 @@ export default function LoginPage({
               </Card>
           </div>
 
-          <div className="relative hidden border-l border-[var(--border-base)] bg-[radial-gradient(circle_at_top,rgba(123,47,190,0.14),transparent_34%),var(--bg-raised)] lg:flex lg:flex-col lg:justify-center lg:px-16 xl:px-24">
+          <div className="relative hidden border-l border-[var(--border-base)] bg-[radial-gradient(circle_at_top,rgba(255,107,0,0.14),transparent_34%),var(--bg-raised)] lg:flex lg:flex-col lg:justify-center lg:px-16 xl:px-24">
             <div className="hero-noise absolute inset-0 opacity-70" />
             <div className="relative z-[1] max-w-[560px]">
               <p className="eyebrow">Welcome back</p>

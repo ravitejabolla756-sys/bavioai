@@ -38,7 +38,7 @@ const voiceScripts: Record<string, string[]> = {
 
 const languageColors: Record<string, string> = {
   "EN Male": "bg-blue-400/10 text-blue-400 border-blue-400/20",
-  "EN Female": "bg-purple-400/10 text-purple-400 border-purple-400/20",
+  "EN Female": "bg-[#FFB380]/10 text-[#FFB380] border-[#FFB380]/20",
   "Hindi Male": "bg-amber-400/10 text-amber-400 border-amber-400/20",
   "Hindi Female": "bg-emerald-400/10 text-emerald-400 border-emerald-400/20",
   "Tamil Female": "bg-rose-400/10 text-rose-400 border-rose-400/20",
@@ -118,10 +118,10 @@ export default function VoicesPage() {
 
               return (
                 <SectionReveal key={voice.name}>
-                  <Card className={`h-full p-7 surface-hover transition-all ${isPlaying ? "border-[var(--border-brand)] shadow-[0_0_40px_rgba(123,47,190,0.12)]" : ""}`}>
+                  <Card className={`h-full p-7 surface-hover transition-all ${isPlaying ? "border-[var(--border-brand)] shadow-[0_0_40px_rgba(255,107,0,0.12)]" : ""}`}>
                     {/* Header */}
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--brand),#A855F7)] text-xl font-black text-black">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--brand),#FF6B00)] text-xl font-black text-black">
                         {voice.name[0]}
                       </div>
                       <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${languageColors[voice.language]}`}>
@@ -218,7 +218,7 @@ export default function VoicesPage() {
                 </div>
                 <div className="flex items-center justify-center border-l border-[var(--border-base)] bg-[var(--bg-raised)] p-12">
                   <div className="text-center">
-                    <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--brand),#A855F7)] text-4xl font-black text-black">
+                    <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--brand),#FF6B00)] text-4xl font-black text-black">
                       Y
                     </div>
                     <p className="mt-5 text-lg font-bold text-[var(--text-primary)]">Your Brand Voice</p>
@@ -239,7 +239,7 @@ export default function VoicesPage() {
 
       {/* Bottom CTA */}
       <section className="relative overflow-hidden py-24">
-        <div className="absolute inset-x-0 bottom-0 h-[380px] bg-[radial-gradient(circle_at_center,rgba(123,47,190,0.14),transparent_68%)]" />
+        <div className="absolute inset-x-0 bottom-0 h-[380px] bg-[radial-gradient(circle_at_center,rgba(255,107,0,0.14),transparent_68%)]" />
         <div className="container relative z-[1] text-center">
           <h2 className="section-title">Ready to set your voice live?</h2>
           <p className="section-sub mx-auto mt-4">
@@ -258,3 +258,4 @@ export default function VoicesPage() {
     </div>
   );
 }
+

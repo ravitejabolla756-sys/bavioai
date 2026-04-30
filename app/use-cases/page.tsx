@@ -1,8 +1,9 @@
 import Link from "next/link";
 
 import { INDUSTRY_USE_CASES } from "@/lib/constants";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, getFaqJsonLd } from "@/lib/seo";
 import { PageTransition } from "@/components/shared/page-transition";
+import { CaseStudyProofGrid } from "@/components/shared/trust-elements";
 import { Card } from "@/components/ui/card";
 
 export const metadata = buildMetadata({
@@ -13,6 +14,12 @@ export const metadata = buildMetadata({
 
 export default function UseCasesPage() {
   const hrefForIndustry = (id: string) => (id === "healthcare" ? "/use-cases/clinics" : `/use-cases/${id}`);
+  const jsonLd = getFaqJsonLd(
+    INDUSTRY_USE_CASES.slice(0, 6).map((item) => ({
+      question: `How does Bavio AI help ${item.title.toLowerCase()} teams?`,
+      answer: item.summary
+    }))
+  );
 
   return (
     <PageTransition>
@@ -45,6 +52,8 @@ export default function UseCasesPage() {
           </div>
         </div>
       </section>
+      <CaseStudyProofGrid />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     </PageTransition>
   );
 }

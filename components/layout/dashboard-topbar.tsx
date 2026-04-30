@@ -20,7 +20,7 @@ export function DashboardTopBar({
         <button
           type="button"
           onClick={onOpenMobileNav}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-[10px] border border-border bg-surface text-foreground lg:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-[10px] border border-border bg-surface text-foreground lg:hidden"
           aria-label="Open dashboard navigation"
         >
           <Menu className="h-4 w-4" />
@@ -45,10 +45,11 @@ export function DashboardTopBar({
           <Sparkles className="h-3.5 w-3.5 text-primary" />
           Real-time sync
         </div>
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,#7B2FBE,#A855F7)] font-heading text-xs font-bold text-white">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#E55A00,#FF6B00)] font-heading text-xs font-bold text-white">
           {(user?.name || user?.email || "B").slice(0, 1).toUpperCase()}
         </div>
       </div>
     </header>
   );
 }
+

@@ -20,11 +20,11 @@ export function HowItWorks() {
               <div key={step.step} className="contents">
                 <SectionReveal delay={index * 120}>
                   <div className="relative h-full overflow-hidden rounded-[16px] border border-border bg-[#0A0A0A] p-8">
-                    <div className="pointer-events-none absolute right-4 top-0 text-[80px] font-extrabold tracking-[-0.04em] text-[rgba(37,99,235,0.15)]">
+                    <div className="pointer-events-none absolute right-4 top-0 text-[80px] font-extrabold tracking-[-0.04em] text-[#FFB380]">
                       {step.step}
                     </div>
                     <div className="relative z-[1]">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-border bg-[#111111] text-primary">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#4A4540] bg-[#111111] text-primary">
                         <Icon className="h-5 w-5" />
                       </div>
                       <h3 className="mt-6 text-[20px] font-bold text-white">{step.title}</h3>

@@ -93,7 +93,7 @@ export default function DashboardUsagePage() {
             {[28, 32, 41, 46, 49, 54, 58, 63, 68, 72, 78, 84].map((value, index) => (
               <div key={index} className="flex flex-1 flex-col items-center gap-2">
                 <div
-                  className="w-full rounded-t-[14px] bg-[linear-gradient(180deg,#A855F7,#7B2FBE)]"
+                  className="w-full rounded-t-[14px] bg-[linear-gradient(180deg,#FF6B00,#E55A00)]"
                   style={{ height: `${Math.max(value * 2, 22)}px` }}
                 />
                 <span className="text-[11px] uppercase tracking-[0.12em] text-[var(--text-muted)]">D{index + 1}</span>
@@ -121,3 +121,4 @@ export default function DashboardUsagePage() {
     </div>
   );
 }
+

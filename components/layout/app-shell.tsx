@@ -12,7 +12,6 @@ import { CursorGlow } from "@/components/shared/cursor-glow";
 import { ScrollProgress } from "@/components/shared/scroll-progress";
 import { ScrollTopButton } from "@/components/shared/scroll-top";
 import { TrustBadges } from "@/components/shared/trust-badges";
-import { WhatsAppFloat } from "@/components/shared/whatsapp-float";
 
 export function AppShell({
   children,
@@ -62,7 +61,6 @@ export function AppShell({
         <ScrollProgress />
         <CursorGlow />
         {children}
-        <WhatsAppFloat />
       </>
     );
   }
@@ -94,7 +92,6 @@ export function AppShell({
         {children}
       </main>
       <Footer />
-      <WhatsAppFloat />
       <ScrollTopButton />
       <CookieConsent />
     </div>

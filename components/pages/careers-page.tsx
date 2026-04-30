@@ -4,175 +4,126 @@ import { ArrowRight } from "lucide-react";
 import { SectionReveal } from "@/components/shared/section-reveal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CAREER_BENEFITS, OPEN_ROLES } from "@/lib/constants";
+import { CAREER_BENEFITS } from "@/lib/constants";
 
 const departments = [
-  { name: "Engineering", roles: ["Backend Engineer", "ML Engineer"] },
-  { name: "Go-to-Market", roles: ["Sales — India"] },
-  { name: "Always open", roles: ["Send your portfolio"] }
+  { name: "Engineering", roles: ["Backend Engineer", "ML Engineer", "Infra Engineer"] },
+  { name: "Product", roles: ["Product Manager", "Product Designer"] },
+  { name: "Sales", roles: ["Account Executive - India", "Enterprise Sales"] },
+  { name: "Marketing", roles: ["Content Lead", "Growth Marketer"] },
+  { name: "Operations", roles: ["Implementation Specialist", "Customer Success Manager"] }
+];
+
+const values = [
+  "Ship weekly, learn daily",
+  "Default to ownership",
+  "Customer outcome over feature vanity",
+  "Respectful direct feedback",
+  "Build for reliability",
+  "Global standards, local empathy"
 ];
 
 export function CareersPage() {
   return (
     <div className="bg-[var(--bg-base)]">
-      {/* Hero */}
       <section className="page-hero">
         <div className="hero-grid absolute inset-0 opacity-40" />
-        <div className="absolute left-1/3 top-0 h-[420px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(123,47,190,0.12),transparent_65%)] blur-3xl" />
         <div className="container page-hero-inner">
           <SectionReveal>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(34,197,94,0.3)] bg-[rgba(34,197,94,0.06)] px-4 py-2 text-sm font-semibold text-[var(--accent-green)]">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--accent-green)]" />
-              3 open positions
-            </div>
-            <h1 className="page-hero-title mt-6 max-w-4xl">
-              Build the future of{" "}
-              <span className="text-gradient">business communication.</span>
-            </h1>
-            <p className="page-hero-copy">
-              We are a small, high-conviction team solving a real problem for millions of Indian businesses. Fast iteration. Real equity. Work that ships every week.
+            <p className="eyebrow">Careers</p>
+            <h1 className="page-hero-title max-w-4xl">Build the Future of Business Communication.</h1>
+            <p className="page-hero-copy max-w-3xl">
+              Join a team building global voice AI infrastructure for real businesses with real operational pressure.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button size="lg" asChild>
+              <Button asChild size="lg">
                 <Link href="#open-roles">
-                  See open roles
+                  View Open Roles
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="ghost" asChild>
-                <Link href="mailto:careers@bavio.in">Send cold email</Link>
+              <Button asChild size="lg" variant="ghost">
+                <Link href="mailto:careers@bavio.ai">Send Your Resume</Link>
               </Button>
             </div>
           </SectionReveal>
         </div>
       </section>
 
-      {/* Why Bavio */}
       <section className="section-shell pt-0">
         <div className="container">
           <SectionReveal className="section-header text-center">
-            <span className="eyebrow">Why Bavio</span>
-            <h2 className="section-title">Work that means something.</h2>
-            <p className="section-sub mx-auto">
-              We move fast, ship constantly, and take every hire seriously. These are not just perks — they are how we operate every day.
-            </p>
+            <span className="eyebrow">Culture and Values</span>
+            <h2 className="section-title">How we work together.</h2>
           </SectionReveal>
-
-          <div className="mt-14 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {CAREER_BENEFITS.map((benefit) => (
-              <SectionReveal key={benefit.title}>
-                <Card className="h-full p-7 surface-hover">
-                  <div className="text-4xl">{benefit.icon}</div>
-                  <h3 className="mt-5 text-xl font-black tracking-[-0.03em] text-[var(--text-primary)]">{benefit.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{benefit.description}</p>
-                </Card>
-              </SectionReveal>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {values.map((value) => (
+              <Card key={value} className="p-6 text-sm text-[var(--text-secondary)]">{value}</Card>
+            ))}
+          </div>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {["Team whiteboard sessions", "Async build days", "Friday launch demos"].map((item) => (
+              <Card key={item} className="p-6 text-center text-sm text-[var(--text-secondary)]">{item}</Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Culture section */}
-      <section className="section-shell pt-0">
-        <div className="container">
-          <SectionReveal>
-            <Card className="overflow-hidden p-0">
-              <div className="grid lg:grid-cols-2">
-                <div className="p-8 md:p-12">
-                  <p className="eyebrow">Culture</p>
-                  <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-[var(--text-primary)]">
-                    We say what we think. We ship what we plan.
-                  </h2>
-                  <div className="mt-6 space-y-4 text-sm leading-8 text-[var(--text-secondary)]">
-                    <p>Bavio operates with radical transparency. If something isn't working, we say it immediately and fix it the same day. There's no hierarchy between good ideas.</p>
-                    <p>We review every deployment together, celebrate wins openly, and treat every user complaint as a product priority. Small team, large responsibility, immense ownership.</p>
-                    <p>If you're the kind of person who would rather build than talk about building, you'll feel at home here.</p>
-                  </div>
-                </div>
-                <div className="border-l border-[var(--border-base)] p-8 md:p-12">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand)]">A typical week</p>
-                  <div className="mt-5 space-y-4">
-                    {[
-                      ["Monday", "Team sync — priorities, blockers, decisions"],
-                      ["Tue–Thu", "Build, ship, iterate. No unnecessary meetings."],
-                      ["Friday", "Demo what shipped. Retro. Weekend energy begins."],
-                      ["Always", "Async Slack. PRs reviewed same day. Real mentorship."]
-                    ].map(([day, desc]) => (
-                      <div key={day} className="flex gap-4">
-                        <span className="w-20 flex-shrink-0 text-xs font-semibold text-[var(--brand)] pt-0.5">{day}</span>
-                        <span className="text-sm text-[var(--text-secondary)]">{desc}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </SectionReveal>
-        </div>
-      </section>
-
-      {/* Open Roles */}
       <section className="section-shell pt-0" id="open-roles">
         <div className="container">
           <SectionReveal className="section-header text-center">
-            <span className="eyebrow">Open positions</span>
-            <h2 className="section-title">Find your role.</h2>
+            <span className="eyebrow">Open Roles</span>
+            <h2 className="section-title">Roles by department.</h2>
           </SectionReveal>
-
-          <div className="mt-14 space-y-5">
-            {OPEN_ROLES.map((role) => (
-              <SectionReveal key={role.title}>
-                <Card className="p-0 overflow-hidden surface-hover">
-                  <div className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-start gap-5">
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-[12px] border border-[var(--border-base)] bg-[var(--bg-base)] text-xs font-black text-[var(--brand)]">
-                        {role.title.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-black tracking-[-0.03em] text-[var(--text-primary)]">{role.title}</h3>
-                        <p className="mt-1 text-sm text-[var(--text-muted)]">{role.location}</p>
-                        <p className="mt-2 text-sm text-[var(--text-secondary)]">{role.description}</p>
-                      </div>
-                    </div>
-                    <Button asChild className="flex-shrink-0">
-                      <Link href="/contact">
-                        Apply
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                  <div className="border-t border-[var(--border-base)] bg-[var(--bg-raised)] px-6 py-3">
-                    <div className="flex flex-wrap gap-3 text-xs text-[var(--text-muted)]">
-                      {["Competitive salary + equity", "Remote-friendly", "Health insurance", "₹60K learning budget"].map((perk) => (
-                        <span key={perk} className="flex items-center gap-1">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-green)]" />
-                          {perk}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-              </SectionReveal>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {departments.map((department) => (
+              <Card key={department.name} className="p-6">
+                <h3 className="text-xl font-black text-[var(--text-primary)]">{department.name}</h3>
+                <ul className="mt-3 space-y-2 text-sm text-[var(--text-secondary)]">
+                  {department.roles.map((role) => (
+                    <li key={role}>{role}</li>
+                  ))}
+                </ul>
+                <Button asChild size="sm" className="mt-5">
+                  <Link href="/contact">Apply</Link>
+                </Button>
+              </Card>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* No open role CTA */}
-          <SectionReveal>
-            <Card className="mt-8 p-8 text-center">
-              <p className="text-2xl font-black tracking-[-0.04em] text-[var(--text-primary)]">
-                Don't see your role?
-              </p>
-              <p className="mx-auto mt-3 max-w-lg text-sm text-[var(--text-secondary)]">
-                We are always looking for exceptional engineers, product thinkers, and operators. Send us a note — if the fit is right, we'll create the role around you.
-              </p>
-              <Button asChild className="mt-6">
-                <Link href="mailto:careers@bavio.in">
-                  Send your portfolio
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </Card>
+      <section className="section-shell pt-0">
+        <div className="container">
+          <SectionReveal className="section-header text-center">
+            <span className="eyebrow">Benefits</span>
+            <h2 className="section-title">Built for long-term builders.</h2>
           </SectionReveal>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {CAREER_BENEFITS.map((benefit) => (
+              <Card key={benefit.title} className="p-6">
+                <p className="text-3xl">{benefit.icon}</p>
+                <h3 className="mt-3 text-xl font-black text-[var(--text-primary)]">{benefit.title}</h3>
+                <p className="mt-2 text-sm text-[var(--text-secondary)]">{benefit.description}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden py-24">
+        <div className="absolute inset-x-0 bottom-0 h-[320px] bg-[radial-gradient(circle_at_center,rgba(255,107,0,0.14),transparent_68%)]" />
+        <div className="container relative z-[1] text-center">
+          <h2 className="section-title">We are always looking for exceptional people.</h2>
+          <p className="section-sub mx-auto mt-4">Even if no role perfectly matches, send your resume and portfolio.</p>
+          <div className="mt-8">
+            <Button asChild size="lg">
+              <Link href="mailto:careers@bavio.ai">
+                Send Your Resume
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
     </div>
