@@ -1,0 +1,39 @@
+{
+  "info": {
+    "name": "Bavio API Collection",
+    "_postman_id": "bavio-api-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Agent",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{api_key}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "https://api.bavio.ai/v1/agents",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Support Agent\",\"language\":\"English\"}"
+        }
+      }
+    },
+    {
+      "name": "Create Call",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{api_key}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "https://api.bavio.ai/v1/calls",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"assistant_id\":\"ag_123\",\"to\":\"+919900000001\"}"
+        }
+      }
+    }
+  ]
+}
